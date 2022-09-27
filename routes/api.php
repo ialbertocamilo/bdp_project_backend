@@ -30,4 +30,4 @@ Route::post('/login',function(Request $request){
     return response()->json(['error'=>'credentials error'],401);
 });
 
-Route::resource('project',\App\Http\Controllers\ProjectController::class);
+Route::resource('project',\App\Http\Controllers\ProjectController::class)->middleware('auth:sanctum');
