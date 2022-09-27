@@ -8,4 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class ProjectType extends Model
 {
     use HasFactory;
+
+    const FVC=1;
+    const DESA=2;
+
+    public function projects(){
+        return  $this->hasMany(Project::class);
+    }
+
 }

@@ -17,3 +17,17 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('/login',function(Request $request){
+
+    $auth=\Illuminate\Support\Facades\Auth::attempt($request->all());
+    if ($auth) {
+        $token = (object)$request->user()->createToken('bdp_token');
+        $token=$token->plainTextToken;
+        $message="Successfully.";
+        return response()->json(compact('token','message'),202);
+    }
+    return response()->json(['error'=>'credentials error'],401);
+});
+
+Route::resource('project',\App\Http\Controllers\ProjectController::class);
