@@ -79,6 +79,7 @@ class FileDataController extends Controller
      */
     public function show(FileData $file_datum)
     {
+
         return response()->json($file_datum);
     }
 
