@@ -5,8 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProjectRequest;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use function App\helpers\OkResponse;
 
 class ProjectController extends Controller
 {
@@ -46,8 +50,8 @@ class ProjectController extends Controller
         $project->uuid = Str::uuid()->toString();
 //        $project->content = ["gaaaa" => "aea"];
 
-        if ($user->projects()->save($project))
-            return Response::json(["message" => 'Saved succesfully.'],201);
+        if ($response=$user->projects()->save($project))
+            return OkResponse($response);
 
         return Response::json(["message" =>'Error.'],402);
     }
@@ -99,4 +103,7 @@ class ProjectController extends Controller
     {
         //
     }
+
+
+
 }
