@@ -17,7 +17,7 @@ class Project extends Model
 
 
     protected $guarded = ['id'];
-    protected $fillable=['uuid','step_name','substep_name','percentage','content','project_type_id'];
+    protected $fillable=['uuid','step_name','substep_name','percentage','content','project_type_id', 'header_project_id'];
 
     protected $casts = [
         'content' => 'json',
@@ -27,6 +27,10 @@ class Project extends Model
     public function projectType(){
        return $this->belongsTo(ProjectType::class);
     }
+
+    public function headerProject(){
+        return $this->belongsTo(HeaderProject::class);
+     }
 
     public function user(){
        return $this->belongsTo(User::class);

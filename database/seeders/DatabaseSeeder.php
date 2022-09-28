@@ -20,6 +20,11 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
+        \App\Models\User::create(
+            ["name" => "admin",
+             "email" => "admin@example.com",
+             "password" => bcrypt("123456")
+            ]);
 
         $this->call(ProjectTypeSeeder::class);
     }
