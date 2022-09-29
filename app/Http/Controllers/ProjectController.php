@@ -65,6 +65,8 @@ class ProjectController extends Controller
      */
     public function show($id)
     {
+        $project = Project::findOrFail($id);
+        return Response::json(compact('project'));
     }
 
     /**
@@ -76,7 +78,8 @@ class ProjectController extends Controller
      */
     public function edit($id)
     {
-        //
+        $project = Project::findOrFail($id);
+        return Response::json(compact('project'));
     }
 
     /**
@@ -87,9 +90,36 @@ class ProjectController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ProjectRequest $request, $id)
     {
-        //
+        $project               = Project::findOrFail($id);
+        $data                  = $request->validated();
+
+        $content = $this->editContentProject($request->step_name,$request->substep_name,$project['content'],$request->content);
+
+        return $content;
+
+        $data['content'] = $content;
+
+        if ($project->update($data))
+            return OkResponse($project);
+
+        return Response::json(["message" =>'Error.'],402);
+    }
+
+    public function editContentProject($step_name,$substep_name,$content,$request)
+    {
+        if (array_key_exists($step_name,$content)) {
+            if(array_key_exists($substep_name,$content[$step_name])) {
+                $content[$step_name][$substep_name] = $request[$step_name][$substep_name];
+            } else {
+                $content[$step_name] = array_merge($content[$step_name],$request[$step_name]);
+            }
+        }else {
+            $content = array_merge($content,$request);
+        }
+
+        return $content;
     }
 
     /**
