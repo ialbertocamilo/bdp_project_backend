@@ -9,30 +9,30 @@ class Project extends Model
 {
     use HasFactory;
 
-    public $id;
-    public $step_name;
-    public $substep_name;
-    public $percentage;
-    public $content;
 
+//    protected $guarded  = ['id'];
+    protected $hidden   = ['project_type_id'];
+    protected $fillable = ['name', 'uuid', 'description', 'project_type_id'];
 
-    protected $guarded = ['id'];
-    protected $fillable=['uuid','step_name','substep_name','percentage','content','project_type_id'];
+    protected $with = ['projectType', 'projectData', 'files'];
 
-    protected $casts = [
-        'content' => 'json',
-    ];
-
-
-    public function projectType(){
-       return $this->belongsTo(ProjectType::class);
+    public function projectType()
+    {
+        return $this->belongsTo(ProjectType::class);
     }
 
-    public function user(){
-       return $this->belongsTo(User::class);
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
-    public function files(){
+    public function files()
+    {
         return $this->hasMany(FileData::class);
+    }
+
+    public function projectData()
+    {
+        return $this->hasMany(ProjectData::class);
     }
 }
