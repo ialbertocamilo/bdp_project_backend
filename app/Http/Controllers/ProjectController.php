@@ -95,19 +95,14 @@ class ProjectController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function update(ProjectRequest $request, $id)
+    public function update(ProjectRequest $request, $project)
     {
-        $project = Project::findOrFail($id);
-        $data    = $request->validated();
-
-        $content = $this->editContentProject($data->step_name, $data->substep_name, $project['content'], $data->content);
-
-        return $content;
-
-        $data['content'] = $content;
-
-        if ($project->update($data))
-            return OkResponse($project);
+        $project       = Project::whereUuid($project)->first();
+        $data          = $request->validated();
+        $project_data  = new ProjectData($data);
+        if ($project->projectData()->save($project_data)){
+            return OkResponse($project_data);
+        }
 
         return Response::json(["message" => 'Error.'], 402);
     }
