@@ -52,10 +52,11 @@ class ProjectController extends Controller
         if ($newProject = $user->projects()->save($project)) {
             $project_data = new ProjectData($data);
             $newProject->projectData()->save($project_data);
+            $project_data = new ProjectData($data);
+            $project_data->substep_name='actividades';
+            $newProject->projectData()->save($project_data);
             return OkResponse($newProject);
         }
-
-
         return Response::json(["message" => 'Error.'], 402);
     }
 
@@ -143,9 +144,12 @@ class ProjectController extends Controller
         //
     }
 
-    public function getAllContents(string $uid){
-        $projectData=Project::whereUuid($uid)->first()->projectData()->get();
-        return OkResponse($projectData,'All contents listed');
+    public function getAllContents(string $step, string $substep,string $uid){
+
+        $projectData=Project::whereUuid($uid)->first()->projectData()->where(function($query) use ($step,$substep){
+           return $query->whereStepName($step)->whereSubstepName($substep);
+        })->first();
+        return OkResponse($projectData,'Contents are listed');
     }
 
 

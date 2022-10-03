@@ -9,11 +9,6 @@ class ProjectData extends Model
 {
     use HasFactory;
 
-    public $id;
-    public $step_name;
-    public $substep_name;
-    public $percentage;
-    public $content;
 
 
     protected $hidden=['project_id'];
