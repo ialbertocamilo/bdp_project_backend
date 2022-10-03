@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProjectRequest;
 use App\Models\Project;
-use Illuminate\Http\Request;
+use App\Models\ProjectData;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
+use function App\helpers\OkResponse;
 
 class ProjectController extends Controller
 {
@@ -40,16 +41,22 @@ class ProjectController extends Controller
      */
     public function store(ProjectRequest $request)
     {
+        $uuid = Str::uuid()->toString();
+        // Crea un registro en projects y crea un registro en project_data
         $user          = $request->user();
         $data          = $request->validated();
         $project       = new Project($data);
-        $project->uuid = Str::uuid()->toString();
-//        $project->content = ["gaaaa" => "aea"];
+        $project->uuid = $uuid;
+        $project->name = 'bdp' . '-' . today()->format('d-m-y') . '-' . $uuid;
 
-        if ($user->projects()->save($project))
-            return Response::json(["message" => 'Saved succesfully.'],201);
+        if ($newProject = $user->projects()->save($project)) {
+            $project_data = new ProjectData($data);
+            $newProject->projectData()->save($project_data);
+            return OkResponse($newProject);
+        }
 
-        return Response::json(["message" =>'Error.'],402);
+
+        return Response::json(["message" => 'Error.'], 402);
     }
 
     /**
@@ -57,10 +64,14 @@ class ProjectController extends Controller
      *
      * @param int $id
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
+    public function show($project)
     {
+        $project = Project::whereUuid($project)->first();
+        if ($project)
+            return OkResponse($project, message: "Project exist.");
+        return response()->json(['message' => "Project doesn't exist."], 400);
     }
 
     /**
@@ -72,7 +83,8 @@ class ProjectController extends Controller
      */
     public function edit($id)
     {
-        //
+        $project = Project::findOrFail($id);
+        return Response::json(compact('project'));
     }
 
     /**
@@ -83,9 +95,36 @@ class ProjectController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ProjectRequest $request, $id)
     {
-        //
+        $project = Project::findOrFail($id);
+        $data    = $request->validated();
+
+        $content = $this->editContentProject($data->step_name, $data->substep_name, $project['content'], $data->content);
+
+        return $content;
+
+        $data['content'] = $content;
+
+        if ($project->update($data))
+            return OkResponse($project);
+
+        return Response::json(["message" => 'Error.'], 402);
+    }
+
+    public function editContentProject($step_name, $substep_name, $content, $request)
+    {
+        if (array_key_exists($step_name, $content)) {
+            if (array_key_exists($substep_name, $content[$step_name])) {
+                $content[$step_name][$substep_name] = $request[$step_name][$substep_name];
+            } else {
+                $content[$step_name] = array_merge($content[$step_name], $request[$step_name]);
+            }
+        } else {
+            $content = array_merge($content, $request);
+        }
+
+        return $content;
     }
 
     /**
@@ -99,4 +138,11 @@ class ProjectController extends Controller
     {
         //
     }
+
+    public function getAllContents(string $uid){
+        $projectData=Project::whereUuid($uid)->first()->projectData()->get();
+        return OkResponse($projectData,'All contents listed');
+    }
+
+
 }

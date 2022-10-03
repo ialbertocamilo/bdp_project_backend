@@ -4,8 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
-
+return new class extends Migration
+{
     /**
      * Run the migrations.
      *
@@ -13,13 +13,14 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create('projects', function (Blueprint $table) {
+        Schema::create('file_data', function (Blueprint $table) {
             $table->id();
             $table->uuid()->unique();
-            $table->foreignId('project_type_id')->default(1)->constrained('project_types');// FVC, DESA
-            $table->text('name');
-            $table->text('description');
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('project_id')->nullable()->constrained('projects');
+            $table->string('project_name_field');
+            $table->string('realname');
+            $table->string('route')->nullable(false);
+            $table->string('size')->nullable(false);
             $table->timestamps();
         });
     }
@@ -31,6 +32,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('projects');
+        Schema::dropIfExists('file_data');
     }
 };
