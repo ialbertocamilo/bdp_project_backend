@@ -52,10 +52,11 @@ class ProjectController extends Controller
         if ($newProject = $user->projects()->save($project)) {
             $project_data = new ProjectData($data);
             $newProject->projectData()->save($project_data);
+            $project_data = new ProjectData($data);
+            $project_data->substep_name='actividades';
+            $newProject->projectData()->save($project_data);
             return OkResponse($newProject);
         }
-
-
         return Response::json(["message" => 'Error.'], 402);
     }
 
@@ -95,37 +96,41 @@ class ProjectController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function update(ProjectRequest $request, $id)
+    public function update(ProjectRequest $request, $project)
     {
-        $project = Project::findOrFail($id);
-        $data    = $request->validated();
+        try {
+            $project       = Project::whereUuid($project)->first();
+            $data          = $request->validated();
 
-        $content = $this->editContentProject($data->step_name, $data->substep_name, $project['content'], $data->content);
+            $updateProjectData =  $this->editContentProject( $request->step_name, $request->substep_name, $project->projectData, $data );
 
-        return $content;
-
-        $data['content'] = $content;
-
-        if ($project->update($data))
+            if (!$updateProjectData) {
+                $project_data  = new ProjectData($data);
+                $project->projectData()->save($project_data);
+            }
             return OkResponse($project);
 
-        return Response::json(["message" => 'Error.'], 402);
+        } catch (\Throwable $th) {
+
+            return Response::json(["message" => 'Error.'], 402);
+
+        }
     }
 
-    public function editContentProject($step_name, $substep_name, $content, $request)
+    public function editContentProject($step_name, $substep_name, $projectData, $request)
     {
-        if (array_key_exists($step_name, $content)) {
-            if (array_key_exists($substep_name, $content[$step_name])) {
-                $content[$step_name][$substep_name] = $request[$step_name][$substep_name];
-            } else {
-                $content[$step_name] = array_merge($content[$step_name], $request[$step_name]);
+        foreach($projectData as $data)
+        {
+            if($data['step_name'] == $step_name && $data['substep_name'] == $substep_name) {
+                $updateProjectData = ProjectData::findOrFail($data['id']);
+                $updateProjectData->update($request);
+                return true;
             }
-        } else {
-            $content = array_merge($content, $request);
         }
 
-        return $content;
+        return false;
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -139,9 +144,12 @@ class ProjectController extends Controller
         //
     }
 
-    public function getAllContents(string $uid){
-        $projectData=Project::whereUuid($uid)->first()->projectData()->get();
-        return OkResponse($projectData,'All contents listed');
+    public function getAllContents(string $step, string $substep,string $uid){
+
+        $projectData=Project::whereUuid($uid)->first()->projectData()->where(function($query) use ($step,$substep){
+           return $query->whereStepName($step)->whereSubstepName($substep);
+        })->first();
+        return OkResponse($projectData,'Contents are listed');
     }
 
 

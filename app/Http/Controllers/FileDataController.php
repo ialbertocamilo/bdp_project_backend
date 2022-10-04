@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FileData;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use function App\helpers\OkResponse;
@@ -58,16 +59,14 @@ class FileDataController extends Controller
 
 //        Auth::user()
         $fileData = new FileData();
-        if ($request->project_id)
-            $fileData->project_id = $request->project_id;
         $fileData->uuid               = Str::uuid()->toString();
         $fileData->project_name_field = $request->project_name_field;
         $fileData->realname           = $request->file_name;
         $fileData->route              = $path;
         $fileData->size               = $file->getSize();
-        $fileData->save();
+        $response=Project::whereUuid($request->uuid)->first()->files()->save($fileData);
 
-        return OkResponse($fileData);
+        return OkResponse($response);
     }
 
     /**
