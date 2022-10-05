@@ -8,5 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class FileData extends Model
 {
     use HasFactory;
-    protected $fillable=['uuid','project_id','name_field','route','size'];
+    protected $fillable=['uuid','project_id','name_field','step','sub_step','route','size'];
+
+    function project(){
+        return $this->hasMany(Project::class);
+    }
 }

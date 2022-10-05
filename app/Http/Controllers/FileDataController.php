@@ -54,19 +54,35 @@ class FileDataController extends Controller
         ]);
 
 
+        if (intval($request->multiple)==0){
+            $step=$request->step;
+            $sub_step=$request->sub_step;
+            $project_name=$request->project_name_field;
+
+            $fileExist=Project::whereUuid($request->uuid)->first()->files()->where(function($query) use ($step,$sub_step,$project_name){
+                return $query
+                    ->whereStep($step)
+                    ->whereSubStep($sub_step)
+                    ->whereProjectNameField($project_name);
+            })->get();
+            if ($fileExist){
+                foreach ($fileExist as $value){
+                    Storage::disk('local')->delete($value->route);
+                    $value->delete();
+                }
+            }
+        }
         $file  = $request->file('file');
         $today = today()->format('d-m-y');
         $path  = $file->storeAs($today, Str::slug($file->getClientOriginalName()) . '(' . $today . '--' . time() . ').' . $file->getClientOriginalExtension());
 
-//        Auth::user()
-        $fileData                     = new FileData();
-        $fileData->uuid               = Str::uuid()->toString();
-        $fileData->project_name_field = $request->project_name_field;
-        $fileData->realname           = $request->file_name;
-        $fileData->route              = $path;
-        $fileData->size               = $file->getSize();
-        $response                     = Project::whereUuid($request->uuid)->first()->files()->save($fileData);
-
+            $fileData                     = new FileData($request->all());
+            $fileData->uuid               = Str::uuid()->toString();
+            $fileData->project_name_field = $request->project_name_field;
+            $fileData->realname           = $request->file_name;
+            $fileData->route              = $path;
+            $fileData->size               = $file->getSize();
+            $response                     = Project::whereUuid($request->uuid)->first()->files()->save($fileData);
         return OkResponse($response);
     }
 
@@ -83,6 +99,7 @@ class FileDataController extends Controller
 
         if ($file){
             if (Storage::exists($file->route)) {
+                header('Content-Type: application/octet-stream');
                 return Storage::download($file->route);
 //            return json_encode(Storage::disk('local')->size($file->route));
             }

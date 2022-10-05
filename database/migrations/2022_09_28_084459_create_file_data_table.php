@@ -18,7 +18,9 @@ return new class extends Migration
             $table->uuid()->unique();
             $table->foreignId('project_id')->nullable()->constrained('projects');
             $table->string('project_name_field');
-            $table->string('realname');
+            $table->string('step')->nullable();
+            $table->string('sub_step')->nullable();
+            $table->text('realname');
             $table->string('route')->nullable(false);
             $table->string('size')->nullable(false);
             $table->timestamps();
