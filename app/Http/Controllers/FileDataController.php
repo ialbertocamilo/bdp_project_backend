@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FileData;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use function App\helpers\OkResponse;
 
@@ -58,13 +59,13 @@ class FileDataController extends Controller
         $path  = $file->storeAs($today, Str::slug($file->getClientOriginalName()) . '(' . $today . '--' . time() . ').' . $file->getClientOriginalExtension());
 
 //        Auth::user()
-        $fileData = new FileData();
+        $fileData                     = new FileData();
         $fileData->uuid               = Str::uuid()->toString();
         $fileData->project_name_field = $request->project_name_field;
         $fileData->realname           = $request->file_name;
         $fileData->route              = $path;
         $fileData->size               = $file->getSize();
-        $response=Project::whereUuid($request->uuid)->first()->files()->save($fileData);
+        $response                     = Project::whereUuid($request->uuid)->first()->files()->save($fileData);
 
         return OkResponse($response);
     }
@@ -74,12 +75,19 @@ class FileDataController extends Controller
      *
      * @param \App\Models\FileData $fileData
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
      */
-    public function show(FileData $file_datum)
+    public function show(string $file_datum)
     {
+        $file = FileData::whereUuid($file_datum)->first();
 
-        return response()->json($file_datum);
+        if ($file){
+            if (Storage::exists($file->route)) {
+                return Storage::download($file->route);
+//            return json_encode(Storage::disk('local')->size($file->route));
+            }
+        }
+        abort(404, 'Resource doesn`t exist');
     }
 
     /**
