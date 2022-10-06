@@ -13,7 +13,7 @@ class ProjectData extends Model
 
     protected $hidden=['project_id'];
     protected $guarded = ['id'];
-    protected $fillable=['step_name','substep_name','percentage','content','project_id'];
+    protected $fillable=['uuid','step_name','substep_name','percentage','content','project_id'];
 
     protected $casts = [
         'content' => 'json',
