@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProjectRequest;
 use App\Models\Project;
 use App\Models\ProjectData;
+use ArrayObject;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 use function App\helpers\OkResponse;
@@ -53,7 +56,7 @@ class ProjectController extends Controller
             $project_data = new ProjectData($data);
             $newProject->projectData()->save($project_data);
             $project_data = new ProjectData($data);
-            $project_data->substep_name='actividades';
+            $project_data->substep_name = 'actividades';
             $newProject->projectData()->save($project_data);
             return OkResponse($newProject);
         }
@@ -67,7 +70,7 @@ class ProjectController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($project)
+    public function show($project): JsonResponse
     {
         $project = Project::whereUuid($project)->first();
         if ($project)
@@ -98,30 +101,37 @@ class ProjectController extends Controller
      */
     public function update(ProjectRequest $request, $project)
     {
-        try {
             $project       = Project::whereUuid($project)->first();
             $data          = $request->validated();
 
-            $updateProjectData =  $this->editContentProject( $request->step_name, $request->substep_name, $project->projectData, $data );
 
+            $updateProjectData =  $this->editContentProject($request->step_name, $request->substep_name, $project->projectData, $data);
+
+            if ($request->substep_name=="registro"){
+                $projectData2=$project->projectData()->whereStepName($request->step_name)->whereSubstepName('actividades')->first();
+                if ($projectData2){// Actualizar actividades segun registro
+                    $dataToUpdate=(object)$data['content'];
+                    $newContent=['content'=>[
+                        "description"=>$dataToUpdate->description,
+                        "origin"=>$dataToUpdate->origin,
+                        "project_type"=>$dataToUpdate->project_type,
+                        "project_sector"=>$dataToUpdate->project_sector,
+                        "economic_activity"=>$dataToUpdate->economic_activity,
+                    ]];
+                    $project->projectData()->whereSubstepName('actividades')->update((array)$newContent);
+                }
+            }
             if (!$updateProjectData) {
                 $project_data  = new ProjectData($data);
                 $project->projectData()->save($project_data);
             }
             return OkResponse($project);
-
-        } catch (\Throwable $th) {
-
-            return Response::json(["message" => 'Error.'], 402);
-
-        }
     }
 
     public function editContentProject($step_name, $substep_name, $projectData, $request)
     {
-        foreach($projectData as $data)
-        {
-            if($data['step_name'] == $step_name && $data['substep_name'] == $substep_name) {
+        foreach ($projectData as $data) {
+            if ($data['step_name'] == $step_name && $data['substep_name'] == $substep_name) {
                 $updateProjectData = ProjectData::findOrFail($data['id']);
                 $updateProjectData->update($request);
                 return true;
@@ -144,13 +154,12 @@ class ProjectController extends Controller
         //
     }
 
-    public function getAllContents(string $step, string $substep,string $uid){
+    public function getAllContents(string $step, string $substep, string $uid)
+    {
 
-        $projectData=Project::whereUuid($uid)->first()->projectData()->where(function($query) use ($step,$substep){
-           return $query->whereStepName($step)->whereSubstepName($substep);
+        $projectData = Project::whereUuid($uid)->first()->projectData()->where(function ($query) use ($step, $substep) {
+            return $query->whereStepName($step)->whereSubstepName($substep);
         })->first();
-        return OkResponse($projectData,'Contents are listed');
+        return OkResponse($projectData, 'Contents are listed');
     }
-
-
 }
