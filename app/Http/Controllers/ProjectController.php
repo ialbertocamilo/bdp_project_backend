@@ -8,6 +8,7 @@ use App\Models\ProjectData;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 use function App\helpers\OkResponse;
+use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
@@ -152,5 +153,18 @@ class ProjectController extends Controller
         return OkResponse($projectData,'Contents are listed');
     }
 
+    public function editTableActivititesImplementation(Request $request, $uid) {
+        $projectData=Project::whereUuid($uid)->first();
+
+        foreach($projectData->projectData as $data)
+        {
+            if($data['step_name'] == 'implementacion' && $data['substep_name'] == 'actividades') {
+                $updateProjectData = ProjectData::findOrFail($data['id']);
+                $updateProjectData->content = $request->all();
+                $updateProjectData->update();
+                return $updateProjectData;
+            }
+        }
+    }
 
 }
