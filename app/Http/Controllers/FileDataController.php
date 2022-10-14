@@ -145,4 +145,16 @@ class FileDataController extends Controller
     {
         //
     }
+
+    public function downloadPublicFile(string $fileName){
+
+
+//        $route=Storage::disk('public')->($fileName);
+
+        $file=$fileName;
+//        return $file;
+//        header('Content-Type: application/octet-stream');
+        return Storage::disk('public')->download('templates/'.$file);
+//        return storage_path('app/public/').$fileName;
+    }
 }
