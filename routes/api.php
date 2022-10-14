@@ -35,4 +35,10 @@ Route::group(['prefix'=>'project','middleware'=>'auth:sanctum'],function(){
 });
 
 Route::resource('project',\App\Http\Controllers\ProjectController::class)->middleware('auth:sanctum');
+
+
+Route::group(['prefix'=>'file-data','middleware'=>'auth:sanctum'],function(){
+    Route::get('public/{fileName}',[\App\Http\Controllers\FileDataController::class,'downloadPublicFile']) ;
+
+});
 Route::resource('file-data',\App\Http\Controllers\FileDataController::class)->middleware('auth:sanctum');
