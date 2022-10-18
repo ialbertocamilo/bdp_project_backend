@@ -44,3 +44,7 @@ Route::group(['prefix'=>'file-data','middleware'=>'auth:sanctum'],function(){
 Route::resource('file-data',\App\Http\Controllers\FileDataController::class)->middleware('auth:sanctum');
 
 Route::post('table-activities/{uid}',[\App\Http\Controllers\ProjectController::class,'editTableActivititesImplementation']);
+
+Route::resource('time-line',\App\Http\Controllers\TimeLineController::class)->middleware('auth:sanctum');
+
+Route::resource('budget',\App\Http\Controllers\BudgetController::class)->middleware('auth:sanctum');
