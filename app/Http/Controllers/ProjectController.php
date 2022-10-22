@@ -160,11 +160,17 @@ class ProjectController extends Controller
         {
             if($data['step_name'] == 'implementacion' && $data['substep_name'] == 'actividades') {
                 $updateProjectData = ProjectData::findOrFail($data['id']);
-                $updateProjectData->content = $request->all();
+                $updateProjectData->content = $this->editContent($updateProjectData->content,$request->table);
                 $updateProjectData->update();
                 return $updateProjectData;
             }
         }
+    }
+
+    public function editContent($content, $table) {
+        $content['table'] = $table;
+
+        return $content;
     }
 
 }
