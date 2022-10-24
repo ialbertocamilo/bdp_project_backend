@@ -48,3 +48,7 @@ Route::post('table-activities/{uid}',[\App\Http\Controllers\ProjectController::c
 Route::resource('time-line',\App\Http\Controllers\TimeLineController::class)->middleware('auth:sanctum');
 
 Route::resource('budget',\App\Http\Controllers\BudgetController::class)->middleware('auth:sanctum');
+
+Route::resource('edt',\App\Http\Controllers\EDTController::class)->middleware('auth:sanctum');
+
+Route::resource('acquisition',\App\Http\Controllers\AcquisitionController::class)->middleware('auth:sanctum');

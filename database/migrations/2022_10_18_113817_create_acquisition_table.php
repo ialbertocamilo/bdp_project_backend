@@ -13,13 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('budget', function (Blueprint $table) {
+        Schema::create('acquisition', function (Blueprint $table) {
             $table->id();
-            $table->string('name_activity', 500);
-            $table->string('use_grade', 50);
-            $table->string('assignment_type',50);
+            $table->string('acquisition', 250);
+            $table->string('modality', 250);
+            $table->date('date_ini');
+            $table->date('date_end');
             $table->double('amount'); //USD AMOUNT
-            $table->foreignId('project_id')->constrained('projects');
+            $table->foreignId('edt_id')->constrained('edt');
             $table->timestamps();
         });
     }
@@ -31,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('budget');
+        Schema::dropIfExists('acquisition');
     }
 };

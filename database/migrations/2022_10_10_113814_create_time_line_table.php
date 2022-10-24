@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('project_data');
+        Schema::dropIfExists('time_line');
     }
 };
