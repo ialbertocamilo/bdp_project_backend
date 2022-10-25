@@ -19,6 +19,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/login', function (Request $request) {
+
     $auth = \Illuminate\Support\Facades\Auth::attempt($request->all());
     if ($auth) {
         $token   = (object)$request->user()->createToken('bdp_token');
@@ -47,3 +48,7 @@ Route::post('table-activities/{uid}', [\App\Http\Controllers\ProjectController::
 Route::resource('time-line', \App\Http\Controllers\TimeLineController::class)->middleware('auth:sanctum');
 
 Route::resource('budget', \App\Http\Controllers\BudgetController::class)->middleware('auth:sanctum');
+
+Route::resource('edt',\App\Http\Controllers\EDTController::class)->middleware('auth:sanctum');
+
+Route::resource('acquisition',\App\Http\Controllers\AcquisitionController::class)->middleware('auth:sanctum');
