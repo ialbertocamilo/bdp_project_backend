@@ -125,8 +125,9 @@ class AcquisitionController extends Controller
      */
     public function destroy($id)
     {
-        $edt    = EDT::find($id);
-        $edt->delete();
+
+        $acquisition    = Acquisition::find($id);
+        $acquisition->delete();
         return Response::json(["message" =>'Eliminacion exitosa.'],201);
     }
 }

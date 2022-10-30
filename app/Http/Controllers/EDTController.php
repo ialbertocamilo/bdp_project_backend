@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\EDT;
+use App\Models\Acquisition;
+use App\Models\Responsability;
+use App\Models\Risk;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use ArrayObject;
@@ -112,7 +115,20 @@ class EDTController extends Controller
     public function destroy($id)
     {
         $edt    = EDT::find($id);
+        $acquisition = Acquisition::where('edt_id', $id )->first();
+        $responsability = Responsability::where('edt_id', $id )->first();
+        $risk = Risk::where('edt_id', $id )->first();
+        if($acquisition){
+            return Response::json(["message"=> "", "error" =>'No se puede eliminar mientras exista una adquisicion relacionada'],201);
+        }
+        if($responsability){
+            return Response::json(["message"=> "", "error" =>'No se puede eliminar mientras exista una responsabilidad relacionada'],201);
+        }
+        if($risk){
+            return Response::json(["message"=> "", "error" =>'No se puede eliminar mientras exista un riesgo relacionado'],201);
+        }
+   
         $edt->delete();
-        return Response::json(["message" =>'Eliminacion exitosa.'],201);
+        return Response::json(["message" =>'Eliminacion exitosa.', "error" =>""],201);
     }
 }

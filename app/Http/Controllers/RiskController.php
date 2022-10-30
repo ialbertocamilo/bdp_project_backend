@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TimeLine;
+use App\Models\EDT;
+use App\Models\Risk;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use ArrayObject;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 use function App\helpers\OkResponse;
 
-class TimeLineController extends Controller
+class RiskController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -21,8 +22,8 @@ class TimeLineController extends Controller
      */
     public function index()
     {
-        $timeLine = TimeLine::all();
-        return Response::json(compact('timeLine'));
+        $risk = Risk::all();
+        return Response::json(compact('risk'));
     }
 
     /**
@@ -44,7 +45,7 @@ class TimeLineController extends Controller
      */
     public function store(Request $request)
     {
-        if (TimeLine::create($request))
+        if (Risk::create($request))
             return Response::json(["message" => 'Saved succesfully.'],201);
 
         return Response::json(["message" =>'Error.'],402);
@@ -59,9 +60,20 @@ class TimeLineController extends Controller
      */
     public function show($id)
     {
-        $project       = Project::whereUuid($id)->first();
-        $timeLine = TimeLine::where('project_id',$project->id)->get();
-        return Response::json(compact('timeLine'));
+      
+
+        $risk = Risk::with('componentEDT')->whereHas('componentEDT', function ($q) use ($id) {
+              $q->whereHas('project', function ($q) use ($id) {
+                $q->where('uuid', $id);
+              });
+            })->get();
+            
+        $componentEDT = EDT::whereHas('project', function ($q) use ($id) {
+            $q->where('uuid', $id);
+          })->get();
+            
+            
+        return Response::json(compact('risk', 'componentEDT'));
     }
 
     /**
@@ -86,16 +98,19 @@ class TimeLineController extends Controller
      */
     public function update(Request $request, $project)
     {
-        
  
-            $project       = Project::whereUuid($project)->first();
+            
             $totalrows=$request->totalrows;
             for ($i = 1; $i <= $totalrows; $i++) {
-                $timeLine = TimeLine::create([
-                    'name_activity'=> $request['Actividad EDT'.$i],
-                    'date_ini' =>  $request['Inicio'.$i],
-                    'date_end' => $request['Fin'.$i],
-                    'project_id'=> $project->id
+                $edt = Risk::create([
+                    'type'=> $request['Tipo'.$i],
+                    'description' =>  $request['Descripcion'.$i],
+                    'i' => $request['I'.$i],
+                    'p' => $request['P'.$i],
+                    'c' => $request['C'.$i],
+                    'value' => $request['Valor'.$i],
+                    'level' => $request['Nivel'.$i],
+                    'edt_id'=> $request['Componente EDT'.$i],
                 ]);
             }
             return Response::json(compact('request'));
@@ -112,8 +127,8 @@ class TimeLineController extends Controller
      */
     public function destroy($id)
     {
-        $timeLine    = TimeLine::find($id);
-        $timeLine->delete();
+        $risk    = Risk::find($id);
+        $risk->delete();
         return Response::json(["message" =>'Eliminacion exitosa.', "error" =>""],201);
     }
 }

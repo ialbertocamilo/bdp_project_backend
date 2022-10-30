@@ -52,3 +52,7 @@ Route::resource('budget',\App\Http\Controllers\BudgetController::class)->middlew
 Route::resource('edt',\App\Http\Controllers\EDTController::class)->middleware('auth:sanctum');
 
 Route::resource('acquisition',\App\Http\Controllers\AcquisitionController::class)->middleware('auth:sanctum');
+
+Route::resource('risk',\App\Http\Controllers\RiskController::class)->middleware('auth:sanctum');
+
+Route::resource('responsability',\App\Http\Controllers\ResponsabilityController::class)->middleware('auth:sanctum');
