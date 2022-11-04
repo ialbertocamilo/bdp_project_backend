@@ -1,7 +1,9 @@
 <?php
 
+use App\Exports\ProjectsExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Maatwebsite\Excel\Facades\Excel;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,7 +36,7 @@ Route::group(['prefix' => 'project', 'middleware' => 'auth:sanctum'], function (
     Route::get('get-contents/{step}/{substep}/{uid}', [\App\Http\Controllers\ProjectController::class, 'getAllContents']);
 });
 
-Route::resource('project', \App\Http\Controllers\ProjectController::class)->middleware('auth:sanctum');
+Route::resource('project', \App\Http\Controllers\ProjectController::class);
 
 
 Route::group(['prefix' => 'file-data', 'middleware' => 'auth:sanctum'], function () {
@@ -52,3 +54,7 @@ Route::resource('budget', \App\Http\Controllers\BudgetController::class)->middle
 Route::resource('edt',\App\Http\Controllers\EDTController::class)->middleware('auth:sanctum');
 
 Route::resource('acquisition',\App\Http\Controllers\AcquisitionController::class)->middleware('auth:sanctum');
+
+Route::get('/export-projects', function () {
+    return Excel::download(new ProjectsExport, 'users.xlsx');
+});
