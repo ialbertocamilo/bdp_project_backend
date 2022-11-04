@@ -36,7 +36,7 @@ Route::group(['prefix' => 'project', 'middleware' => 'auth:sanctum'], function (
     Route::get('get-contents/{step}/{substep}/{uid}', [\App\Http\Controllers\ProjectController::class, 'getAllContents']);
 });
 
-Route::resource('project', \App\Http\Controllers\ProjectController::class);
+Route::resource('project', \App\Http\Controllers\ProjectController::class)->middleware('auth:sanctum');
 
 
 Route::group(['prefix' => 'file-data', 'middleware' => 'auth:sanctum'], function () {

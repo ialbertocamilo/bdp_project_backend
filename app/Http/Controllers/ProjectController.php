@@ -47,7 +47,7 @@ class ProjectController extends Controller
     {
         $uuid = Str::uuid()->toString();
         // Crea un registro en projects y crea un registro en project_data
-        $user          = $request->user();
+        $user          = auth()->user();
         $data          = $request->validated();
         $project       = new Project($data);
         $project->uuid = $uuid;
