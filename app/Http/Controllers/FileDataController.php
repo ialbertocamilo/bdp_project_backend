@@ -43,7 +43,6 @@ class FileDataController extends Controller
         $request->validate([
             'file' => [
                 'required',
-                'max:10000'
             ],
             'project_name_field' => [
                 'required',
