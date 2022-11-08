@@ -22,10 +22,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/login', function (Request $request) {
 
-    return response()->json($request->all());
-
-    $auth=Auth::attempt(['email'=>$request->email,'password'=>$request->password]);
-    if ($auth) {
+    Auth::attempt(['email'=>$request->email,'password'=>$request->password]);
+    if (Auth::check()) {
         $token = (object)$request->user()->createToken('bdp_token');
         $token=$token->plainTextToken;
         $message="Successfully.";
