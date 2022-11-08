@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TimeLine;
+use App\Models\EDT;
+use App\Models\Responsability;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use ArrayObject;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 use function App\helpers\OkResponse;
 
-class TimeLineController extends Controller
+class ResponsabilityController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -21,8 +22,8 @@ class TimeLineController extends Controller
      */
     public function index()
     {
-        $timeLine = TimeLine::all();
-        return Response::json(compact('timeLine'));
+        $responsability = Responsability::all();
+        return Response::json(compact('responsability'));
     }
 
     /**
@@ -44,7 +45,7 @@ class TimeLineController extends Controller
      */
     public function store(Request $request)
     {
-        if (TimeLine::create($request))
+        if (Responsability::create($request))
             return Response::json(["message" => 'Saved succesfully.'],201);
 
         return Response::json(["message" =>'Error.'],402);
@@ -59,9 +60,20 @@ class TimeLineController extends Controller
      */
     public function show($id)
     {
-        $project       = Project::whereUuid($id)->first();
-        $timeLine = TimeLine::where('project_id',$project->id)->get();
-        return Response::json(compact('timeLine'));
+      
+
+        $responsability = Responsability::with('componentEDT')->whereHas('componentEDT', function ($q) use ($id) {
+              $q->whereHas('project', function ($q) use ($id) {
+                $q->where('uuid', $id);
+              });
+            })->get();
+            
+        $componentEDT = EDT::whereHas('project', function ($q) use ($id) {
+            $q->where('uuid', $id);
+          })->get();
+            
+            
+        return Response::json(compact('responsability', 'componentEDT'));
     }
 
     /**
@@ -86,16 +98,14 @@ class TimeLineController extends Controller
      */
     public function update(Request $request, $project)
     {
-        
  
-            $project       = Project::whereUuid($project)->first();
+            
             $totalrows=$request->totalrows;
             for ($i = 1; $i <= $totalrows; $i++) {
-                $timeLine = TimeLine::create([
-                    'name_activity'=> $request['Actividad EDT'.$i],
-                    'date_ini' =>  $request['Inicio'.$i],
-                    'date_end' => $request['Fin'.$i],
-                    'project_id'=> $project->id
+                $edt = Responsability::create([
+                    'member'=> $request['Miembro'.$i],
+                    'responsability' =>  $request['Responsabilidad'.$i],
+                    'edt_id'=> $request['Componente EDT'.$i],
                 ]);
             }
             return Response::json(compact('request'));
@@ -112,8 +122,8 @@ class TimeLineController extends Controller
      */
     public function destroy($id)
     {
-        $timeLine    = TimeLine::find($id);
-        $timeLine->delete();
+        $responsability    = Responsability::find($id);
+        $responsability->delete();
         return Response::json(["message" =>'Eliminacion exitosa.', "error" =>""],201);
     }
 }

@@ -114,6 +114,6 @@ class BudgetController extends Controller
     {
         $budget    = Budget::find($id);
         $budget->delete();
-        return Response::json(["message" =>'Eliminacion exitosa.'],201);
+        return Response::json(["message" =>'Eliminacion exitosa.', "error" =>""],201);
     }
 }
