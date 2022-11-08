@@ -32,6 +32,11 @@ Route::post('/login', function (Request $request) {
     return response()->json(['error' => 'credentials error'], 401);
 });
 
+Route::get('/test',function(){
+   return response()->json("test data !");
+});
+
+
 Route::group(['prefix' => 'project', 'middleware' => 'auth:sanctum'], function () {
     Route::get('get-contents/{step}/{substep}/{uid}', [\App\Http\Controllers\ProjectController::class, 'getAllContents']);
 });
