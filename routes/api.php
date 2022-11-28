@@ -1,6 +1,8 @@
 <?php
 
 use App\Exports\ProjectsExport;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Maatwebsite\Excel\Facades\Excel;
@@ -67,3 +69,6 @@ Route::resource('responsability',\App\Http\Controllers\ResponsabilityController:
 Route::get('/export-projects', function () {
     return Excel::download(new ProjectsExport, 'users.xlsx');
 });
+
+Route::apiResource('users', UserController::class);
+Route::apiResource('roles', RoleController::class);
