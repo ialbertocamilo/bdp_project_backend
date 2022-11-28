@@ -4,6 +4,7 @@ use App\Exports\ProjectsExport;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -23,9 +24,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/login', function (Request $request) {
-
-    Auth::attempt(['email'=>$request->email,'password'=>$request->password]);
-    if (Auth::check()) {
+    $auth=Auth::attempt(['email'=>$request->email,'password'=>$request->password]);
+    if ($auth) {
         $token = (object)$request->user()->createToken('bdp_token');
         $token=$token->plainTextToken;
         $message="Successfully.";
