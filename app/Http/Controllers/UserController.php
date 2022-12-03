@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserEditRequest;
 use App\Http\Requests\UserRequest;
 use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 use function App\helpers\OkResponse;
 
 class UserController extends Controller
@@ -18,6 +21,7 @@ class UserController extends Controller
      */
     public function index()
     {
+        //return Auth::user()->role;
         $user = User::paginate(10);
         return new UserCollection($user);
     }
@@ -36,7 +40,7 @@ class UserController extends Controller
             $user->email = $request->email;
             $user->password = bcrypt($request->password);
             if (isset($request->role)) {
-                $user->assignRole($request->role);
+                $user->syncRoles($request->role);
             }
             $user->save();
             return OkResponse($user, 'Usuario Guardado Correctamente', 201);
@@ -63,7 +67,7 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(UserEditRequest $request, User $user)
     {
         try {
             $user->name = $request->name;
@@ -72,7 +76,7 @@ class UserController extends Controller
                 $user->password = bcrypt($request->password);
             }
             if (isset($request->role)) {
-                $user->assignRole($request->role);
+                $user->syncRoles($request->role);
             }
             $user->update();
             return OkResponse($user, 'Usuario Actualizado Correctamente');

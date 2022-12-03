@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserEditRequest extends FormRequest
@@ -25,8 +26,8 @@ class UserEditRequest extends FormRequest
     {
         return [
             'name' => 'required',
-            'password' => 'required',
-            'email' => "required|email|unique:users,email,{$this->id}"
+            'password' => 'sometimes',
+            'email' =>   'required|email|unique:users,email,'.$this->user->id,
         ];
     }
 }
