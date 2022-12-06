@@ -31,7 +31,7 @@ Route::post('/login', function (Request $request) {
         $token = (object)$request->user()->createToken('bdp_token');
         $token=$token->plainTextToken;
         $message="Successfully.";
-        $roles = Auth::user()->roles;
+        $roles = Auth::user()->roles[0]->name;
         return response()->json(compact('token','roles','message'),202);
     }
     return response()->json(['error'=>'credentials error'],401);
