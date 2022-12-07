@@ -20,6 +20,12 @@ class ProjectController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
+    public function __construct()
+    {
+
+    }
+
+
     public function index()
     {
         $projects = Project::all();
