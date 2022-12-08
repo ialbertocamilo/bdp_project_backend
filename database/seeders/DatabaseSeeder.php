@@ -28,5 +28,6 @@ class DatabaseSeeder extends Seeder
         $user->password=Hash::make('123');
         $user->save();
         $this->call(ProjectTypeSeeder::class);
+        $this->call(RoleSeeder::class);
     }
 }
