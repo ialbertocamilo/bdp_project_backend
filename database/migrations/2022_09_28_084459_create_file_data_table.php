@@ -23,6 +23,7 @@ return new class extends Migration
             $table->text('realname');
             $table->string('route')->nullable(false);
             $table->string('size')->nullable(false);
+            $table->boolean('multiple')->nullable(false)->default(false);
             $table->timestamps();
         });
     }

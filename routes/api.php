@@ -44,6 +44,7 @@ Route::get('/logout', function (Request $request) {
     if (Auth::check()) {
         $request->user()->currentAccessToken()->delete();
     }
+
     return response()->json(["msg" =>Auth::check()]);
 })->middleware("auth:sanctum");
 
