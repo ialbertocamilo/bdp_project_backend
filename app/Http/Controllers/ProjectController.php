@@ -67,7 +67,7 @@ class ProjectController extends Controller
             $newProject->projectData()->save($project_data);
             return OkResponse($newProject);
         }
-        return Response::json(["message" => 'Error.'], 402);
+        return Response::json(["message" => 'Error.'], 401);
     }
 
     /**
@@ -137,7 +137,7 @@ class ProjectController extends Controller
 
         } catch (\Throwable $th) {
 
-            return Response::json(["message" => 'Error.'], 402);
+            return Response::json(["message" => $th->getMessage()], 401);
 
         }
     }

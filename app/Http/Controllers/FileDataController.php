@@ -141,9 +141,14 @@ class FileDataController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function destroy(FileData $file_datum)
+    public function destroy(string $file_datum)
     {
-        //
+
+        $data = FileData::whereUuid($file_datum)->first();
+
+        Storage::disk('local')->delete($data->route);
+        $data->delete();
+        return response()->json(["message" => "File has been deleted.", "uuid" => $file_datum]);
     }
 
     public function downloadPublicFile(string $fileName)
