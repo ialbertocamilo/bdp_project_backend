@@ -192,4 +192,11 @@ class ProjectController extends Controller
         }
     }
 
+    public function closeProject($uuid) {
+        $project = Project::whereUuid($uuid)->first();
+        $project->estado = 0;
+        $project->update();
+        return OkResponse($project, 'Closed successfully', 204);
+    }
+
 }

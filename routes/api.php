@@ -1,6 +1,7 @@
 <?php
 
 use App\Exports\ProjectsExport;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Resources\UserResource;
@@ -129,6 +130,8 @@ Route::get('/export-projects', function () {
 
 Route::apiResource('users', UserController::class)->middleware(['auth:sanctum', 'role:Supervisor|Gestor']);
 Route::apiResource('roles', RoleController::class)->middleware(['auth:sanctum', 'role:Supervisor']);
+
+Route::get('close-project/{uuid}', [ProjectController::class, 'closeProject'])->middleware(['auth:sanctum', 'role:Supervisor']);
 
 /* Route::get('api',function(){
 
