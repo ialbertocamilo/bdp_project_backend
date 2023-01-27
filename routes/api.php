@@ -46,14 +46,14 @@ Route::get('/logout', function (Request $request) {
         $request->user()->currentAccessToken()->delete();
     }
 
-    return response()->json(["msg" =>Auth::check()]);
+    return response()->json(["msg" => Auth::check()]);
 })->middleware("auth:sanctum");
 
 const DOMAIN = "bdp.com.bo";
 const DN     = "dc=bdp,dc=com,dc=bo";
 Route::get('/test', function () {
     $user       = "rchiri";
-    $pass       = "consultsdfsfssor.1";
+    $pass       = "consultor.1";
     $ldaprdn    = trim($user) . '@' . DOMAIN;
     $ldappass   = trim($pass);
     $ds         = DOMAIN;
@@ -73,12 +73,9 @@ Route::get('/test', function () {
         $array = 0;
     }
     ldap_close($ldapconn);
-
-    if ($array!=0 || $array!='')
-        return response()->json(["data"=>$array,"msg"=>"Logeado correctamente"]);
-    else
+    if ($array == 0 || $array == '')
         return response()->json("Usuario AD incorrecto");
-    return response()->json("test data !");
+    return response()->json(["data" => $array, "msg" => "Logeado correctamente"]);
 });
 
 
@@ -93,7 +90,7 @@ Route::get('project/{project}', [\App\Http\Controllers\ProjectController::class,
 Route::get('project/{project}', [\App\Http\Controllers\ProjectController::class, 'show'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
 Route::put('project/{project}', [\App\Http\Controllers\ProjectController::class, 'update'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
 Route::delete('project/{project}', [\App\Http\Controllers\ProjectController::class])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
-Route::get('project/{uuid}/get-status/', [\App\Http\Controllers\ProjectController::class,'getProjectStatus'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
+Route::get('project/{uuid}/get-status/', [\App\Http\Controllers\ProjectController::class, 'getProjectStatus'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
 
 
 Route::group(['prefix' => 'file-data', 'middleware' => 'auth:sanctum,role:Gestor|Supervisor|Auditor'], function () {
@@ -159,7 +156,7 @@ Route::get('/export-projects', function () {
 
 Route::apiResource('users', UserController::class)->middleware(['auth:sanctum', 'role:Supervisor|Gestor']);
 
-Route::get('users/role/{id}',[UserController::class,'getUsersByRoleId']);
+Route::get('users/role/{id}', [UserController::class, 'getUsersByRoleId']);
 Route::apiResource('roles', RoleController::class)->middleware(['auth:sanctum', 'role:Supervisor']);
 
 Route::get('close-project/{uuid}', [ProjectController::class, 'closeProject'])->middleware(['auth:sanctum', 'role:Supervisor']);
