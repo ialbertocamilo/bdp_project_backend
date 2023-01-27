@@ -53,7 +53,7 @@ const DOMAIN = "bdp.com.bo";
 const DN     = "dc=bdp,dc=com,dc=bo";
 Route::get('/test', function () {
     $user       = "rchiri";
-    $pass       = "consultor.1";
+    $pass       = "consultsdfsfssor.1";
     $ldaprdn    = trim($user) . '@' . DOMAIN;
     $ldappass   = trim($pass);
     $ds         = DOMAIN;
