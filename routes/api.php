@@ -51,7 +51,7 @@ Route::get('/logout', function (Request $request) {
 
 Route::get('/test', function () {
     return response()->json("test data !");
-});
+})->middleware("auth.ad");
 
 
 Route::group(['prefix' => 'project', 'middleware' => 'auth:sanctum,role:Gestor|Supervisor|Auditor'], function () {
@@ -65,6 +65,7 @@ Route::get('project/{project}', [\App\Http\Controllers\ProjectController::class,
 Route::get('project/{project}', [\App\Http\Controllers\ProjectController::class, 'show'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
 Route::put('project/{project}', [\App\Http\Controllers\ProjectController::class, 'update'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
 Route::delete('project/{project}', [\App\Http\Controllers\ProjectController::class])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
+Route::get('project/{uuid}/get-status/', [\App\Http\Controllers\ProjectController::class,'getProjectStatus'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
 
 
 Route::group(['prefix' => 'file-data', 'middleware' => 'auth:sanctum,role:Gestor|Supervisor|Auditor'], function () {
@@ -129,6 +130,8 @@ Route::get('/export-projects', function () {
 })->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
 
 Route::apiResource('users', UserController::class)->middleware(['auth:sanctum', 'role:Supervisor|Gestor']);
+
+Route::get('users/role/{id}',[UserController::class,'getUsersByRoleId']);
 Route::apiResource('roles', RoleController::class)->middleware(['auth:sanctum', 'role:Supervisor']);
 
 Route::get('close-project/{uuid}', [ProjectController::class, 'closeProject'])->middleware(['auth:sanctum', 'role:Supervisor']);

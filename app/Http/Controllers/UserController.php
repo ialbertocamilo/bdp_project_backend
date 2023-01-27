@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+use Spatie\Permission\Models\Role;
 use function App\helpers\OkResponse;
 
 class UserController extends Controller
@@ -95,5 +96,11 @@ class UserController extends Controller
     {
         $user->delete();
         return OkResponse($user, 'Usuario Eliminado Correctamente', 204);
+    }
+
+    public function getUsersByRoleId(int $id){
+
+
+        return OkResponse(Role::findById($id),'Usuarios con role id = '.$id);
     }
 }
