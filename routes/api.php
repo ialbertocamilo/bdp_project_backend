@@ -49,9 +49,37 @@ Route::get('/logout', function (Request $request) {
     return response()->json(["msg" =>Auth::check()]);
 })->middleware("auth:sanctum");
 
+const DOMAIN = "bdp.com.bo";
+const DN     = "dc=bdp,dc=com,dc=bo";
 Route::get('/test', function () {
+    $user       = "rchiri";
+    $pass       = "consultor.1";
+    $ldaprdn    = trim($user) . '@' . DOMAIN;
+    $ldappass   = trim($pass);
+    $ds         = DOMAIN;
+    $dn         = DN;
+    $puertoldap = 389;
+    $ldapconn   = ldap_connect($ds, $puertoldap);
+    ldap_set_option($ldapconn, LDAP_OPT_PROTOCOL_VERSION, 3);
+    ldap_set_option($ldapconn, LDAP_OPT_REFERRALS, 0);
+    $ldapbind = @ldap_bind($ldapconn, $ldaprdn, $ldappass);
+    if ($ldapbind) {
+        $filter = "(|(SAMAccountName=" . trim($user) . "))";
+        $fields = ["SAMAccountName"];
+        $sr     = @ldap_search($ldapconn, $dn, $filter, $fields);
+        $info   = @ldap_get_entries($ldapconn, $sr);
+        $array  = $info[0]["samaccountname"][0];
+    } else {
+        $array = 0;
+    }
+    ldap_close($ldapconn);
+
+    if (count($array) > 0)
+        return response()->json("Logeado correctamente");
+    else
+        return response()->json("Usuario AD incorrecto");
     return response()->json("test data !");
-})->middleware("auth.ad");
+});
 
 
 Route::group(['prefix' => 'project', 'middleware' => 'auth:sanctum,role:Gestor|Supervisor|Auditor'], function () {
