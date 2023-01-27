@@ -74,7 +74,7 @@ Route::get('/test', function () {
     }
     ldap_close($ldapconn);
 
-    if (count($array) > 0)
+    if ($array!=0 || $array!='')
         return response()->json("Logeado correctamente");
     else
         return response()->json("Usuario AD incorrecto");
