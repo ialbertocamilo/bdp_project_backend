@@ -135,7 +135,10 @@ Route::apiResource('roles', RoleController::class)->middleware(['auth:sanctum', 
 Route::get('close-project/{uuid}', [ProjectController::class, 'closeProject'])->middleware(['auth:sanctum', 'role:Supervisor']);
 
 Route::get('get-totales', [DashboardGraphicController::class,'getTotalesProyectos']);
-Route::get('flujo-projects', [DashboardGraphicController::class,'getFlujoProyectos']);
+Route::get('flujo-projects-fvc', [DashboardGraphicController::class,'getFlujoProyectosTotalesFvc']);
+Route::get('flujo-projects-desa', [DashboardGraphicController::class,'getFlujoProyectosTotalesDesa']);
+Route::get('flujo-projects-fvc-por-vencer', [DashboardGraphicController::class,'getFlujoProyectosPorVencerFvc']);
+Route::get('flujo-projects-desa-por-vencer', [DashboardGraphicController::class,'getFlujoProyectosPorVencerDesa']);
 
 /* Route::get('api',function(){
 
