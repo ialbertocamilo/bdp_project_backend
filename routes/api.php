@@ -1,6 +1,7 @@
 <?php
 
 use App\Exports\ProjectsExport;
+use App\Http\Controllers\DashboardGraphicController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -168,6 +169,12 @@ Route::get('users/role/{id}', [UserController::class, 'getUsersByRoleId']);
 Route::apiResource('roles', RoleController::class)->middleware(['auth:sanctum', 'role:Supervisor']);
 
 Route::get('close-project/{uuid}', [ProjectController::class, 'closeProject'])->middleware(['auth:sanctum', 'role:Supervisor']);
+
+Route::get('get-totales', [DashboardGraphicController::class,'getTotalesProyectos']);
+Route::get('flujo-projects-fvc', [DashboardGraphicController::class,'getFlujoProyectosTotalesFvc']);
+Route::get('flujo-projects-desa', [DashboardGraphicController::class,'getFlujoProyectosTotalesDesa']);
+Route::get('flujo-projects-fvc-por-vencer', [DashboardGraphicController::class,'getFlujoProyectosPorVencerFvc']);
+Route::get('flujo-projects-desa-por-vencer', [DashboardGraphicController::class,'getFlujoProyectosPorVencerDesa']);
 
 /* Route::get('api',function(){
 
