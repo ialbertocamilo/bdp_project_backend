@@ -33,10 +33,11 @@ Route::post('/login', function (Request $request) {
         $token   = $token->plainTextToken;
         $message = "Successfully.";
         $roles   = '';
+        $profile=Auth::user();
         if (count(Auth::user()->roles) > 0) {
             $roles = Auth::user()->roles[0]->name;
         }
-        return response()->json(compact('token', 'roles', 'message'), 202);
+        return response()->json(compact('token', 'roles','profile', 'message'), 202);
     }
     return response()->json(['error' => 'credentials error'], 401);
 });
@@ -53,8 +54,8 @@ Route::get('/logout', function (Request $request) {
 const DOMAIN = "bdp.com.bo";
 const DN     = "dc=bdp,dc=com,dc=bo";
 Route::get('/test', function () {
-    $user       = "rchiri";
-    $pass       = "consultor.1";
+    $user    = "rchiri";
+    $pass    = "consultor.1";
     $ldaprdn = 'mydomain' . "\\" . $username;
 
     ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
@@ -63,15 +64,14 @@ Route::get('/test', function () {
     $bind = @ldap_bind($ldap, $ldaprdn, $password);
 
     if ($bind) {
-        $filter="(sAMAccountName=$username)";
-        $result = ldap_search($ldap,"dc=MYDOMAIN,dc=COM",$filter);
-        ldap_sort($ldap,$result,"sn");
+        $filter = "(sAMAccountName=$username)";
+        $result = ldap_search($ldap, "dc=MYDOMAIN,dc=COM", $filter);
+        ldap_sort($ldap, $result, "sn");
         $info = ldap_get_entries($ldap, $result);
-        for ($i=0; $i<$info["count"]; $i++)
-        {
-            if($info['count'] > 1)
+        for ($i = 0; $i < $info["count"]; $i++) {
+            if ($info['count'] > 1)
                 break;
-            echo "<p>You are accessing <strong> ". $info[$i]["sn"][0] .", " . $info[$i]["givenname"][0] ."</strong><br /> (" . $info[$i]["samaccountname"][0] .")</p>\n";
+            echo "<p>You are accessing <strong> " . $info[$i]["sn"][0] . ", " . $info[$i]["givenname"][0] . "</strong><br /> (" . $info[$i]["samaccountname"][0] . ")</p>\n";
             echo '<pre>';
             var_dump($info);
             echo '</pre>';
@@ -170,11 +170,14 @@ Route::apiResource('roles', RoleController::class)->middleware(['auth:sanctum', 
 
 Route::get('close-project/{uuid}', [ProjectController::class, 'closeProject'])->middleware(['auth:sanctum', 'role:Supervisor']);
 
-Route::get('get-totales', [DashboardGraphicController::class,'getTotalesProyectos']);
-Route::get('flujo-projects-fvc', [DashboardGraphicController::class,'getFlujoProyectosTotalesFvc']);
-Route::get('flujo-projects-desa', [DashboardGraphicController::class,'getFlujoProyectosTotalesDesa']);
-Route::get('flujo-projects-fvc-por-vencer', [DashboardGraphicController::class,'getFlujoProyectosPorVencerFvc']);
-Route::get('flujo-projects-desa-por-vencer', [DashboardGraphicController::class,'getFlujoProyectosPorVencerDesa']);
+Route::get('get-totales', [DashboardGraphicController::class, 'getTotalesProyectos']);
+Route::get('flujo-projects-fvc', [DashboardGraphicController::class, 'getFlujoProyectosTotalesFvc']);
+Route::get('flujo-projects-desa', [DashboardGraphicController::class, 'getFlujoProyectosTotalesDesa']);
+Route::get('flujo-projects-fvc-por-vencer', [DashboardGraphicController::class, 'getFlujoProyectosPorVencerFvc']);
+Route::get('flujo-projects-desa-por-vencer', [DashboardGraphicController::class, 'getFlujoProyectosPorVencerDesa']);
+
+Route::get('user-assignment/my-slaves', [\App\Http\Controllers\UserAssignmentController::class,'getMySlaves'])->middleware(['auth:sanctum']);
+Route::apiResource('user-assignment', \App\Http\Controllers\UserAssignmentController::class)->middleware(['auth:sanctum']);
 
 /* Route::get('api',function(){
 
