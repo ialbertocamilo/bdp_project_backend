@@ -119,6 +119,7 @@ class ProjectController extends Controller
                 $projectData2 = $project->projectData()->whereStepName($request->step_name)->whereSubstepName('actividades')->first();
                 if ($projectData2) {// Actualizar actividades segun registro
                     $dataToUpdate = (object)$data['content'];
+                    $project->description=$dataToUpdate->description;
                     $newContent   = ['content' => [
                         "description" => $dataToUpdate->description,
                         "origin" => $dataToUpdate->origin,
@@ -127,6 +128,7 @@ class ProjectController extends Controller
                         "economic_activity" => $dataToUpdate->economic_activity,
                     ]];
                     $project->projectData()->whereSubstepName('actividades')->update((array)$newContent);
+                    $project->update();
                 }
             }
             if (!$updateProjectData) {

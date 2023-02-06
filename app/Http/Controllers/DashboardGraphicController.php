@@ -50,7 +50,7 @@ class DashboardGraphicController extends Controller
         $fvcTotal = 0;
 
         foreach ($fvc as $key => $value) {
-            $table = $value->content['table'];
+            $table =@$value->content['table'];
             if($table) {
                 foreach ($table as $key1 => $value1) {
                     $fvcTotal++;
@@ -75,7 +75,7 @@ class DashboardGraphicController extends Controller
         $desaTotal = 0;
 
         foreach ($desa as $key => $value) {
-            $table = $value->content['table'];
+            $table = @$value->content['table'];
             if($table) {
                 foreach ($table as $key1 => $value1) {
                     $desaTotal++;
@@ -123,7 +123,7 @@ class DashboardGraphicController extends Controller
         $fvc = ProjectData::where('step_name','implementacion')->where('substep_name','actividades')->get();
 
         foreach ($fvc as $key => $value) {
-            $table = $value->content['table'];
+            $table = @$value->content['table'];
             if($table) {
                 foreach ($table as $key1 => $value1) {
                     $fechaFin = $value1['dateEnd'];
@@ -164,7 +164,7 @@ class DashboardGraphicController extends Controller
         $desa = ProjectData::where('step_name','ejecucion')->where('substep_name','actividades')->get();
 
         foreach ($desa as $key => $value) {
-            $table = $value->content['table'];
+            $table = @$value->content['table'];
             if($table) {
                 foreach ($table as $key1 => $value1) {
                     $fechaFin = $value1['dateEnd'];
@@ -189,7 +189,7 @@ class DashboardGraphicController extends Controller
         $desa = ProjectData::where('step_name','ejecucion')->where('substep_name','actividades')->get();
 
         foreach ($desa as $key => $value) {
-            $table = $value->content['table'];
+            $table = @$value->content['table'];
             if($table) {
                 foreach ($table as $key1 => $value1) {
                     $fechaFin = $value1['dateEnd'];
@@ -213,7 +213,7 @@ class DashboardGraphicController extends Controller
         $fvc = ProjectData::where('step_name','implementacion')->where('substep_name','actividades')->get();
 
         foreach ($fvc as $key => $value) {
-            $table = $value->content['table'];
+            $table = @$value->content['table'];
             if($table) {
                 foreach ($table as $key1 => $value1) {
                     $fechaFin = $value1['dateEnd'];
