@@ -28,8 +28,11 @@ class ProjectController extends Controller
 
     public function index()
     {
-        $projects = Project::all();
-        return Response::json(compact('projects'));
+        $projects = auth()->user()->projects()->with('user')->get();
+
+        $details= ["open"=>auth()->user()->projects()->whereEstado(1)->get()->count(),"close"=>auth()->user()->projects()->whereEstado(0)->get()->count()];
+
+        return Response::json(compact('projects','details'));
     }
 
     /**
