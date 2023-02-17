@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->uuid()->unique();
             $table->foreignId('project_type_id')->default(1)->constrained('project_types');// FVC, DESA
             $table->text('name');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->foreignId('user_id')->constrained('users');
             $table->timestamps();
         });
