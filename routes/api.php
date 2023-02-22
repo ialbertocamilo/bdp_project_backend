@@ -170,11 +170,11 @@ Route::apiResource('roles', RoleController::class)->middleware(['auth:sanctum', 
 
 Route::get('close-project/{uuid}', [ProjectController::class, 'closeProject'])->middleware(['auth:sanctum', 'role:Supervisor']);
 
-Route::get('get-totales', [DashboardGraphicController::class, 'getTotalesProyectos']);
-Route::get('flujo-projects-fvc', [DashboardGraphicController::class, 'getFlujoProyectosTotalesFvc']);
-Route::get('flujo-projects-desa', [DashboardGraphicController::class, 'getFlujoProyectosTotalesDesa']);
-Route::get('flujo-projects-fvc-por-vencer', [DashboardGraphicController::class, 'getFlujoProyectosPorVencerFvc']);
-Route::get('flujo-projects-desa-por-vencer', [DashboardGraphicController::class, 'getFlujoProyectosPorVencerDesa']);
+Route::get('get-totales', [DashboardGraphicController::class, 'getTotalesProyectos'])->middleware(['auth:sanctum']);
+Route::get('flujo-projects-fvc', [DashboardGraphicController::class, 'getFlujoProyectosTotalesFvc'])->middleware(['auth:sanctum']);
+Route::get('flujo-projects-desa', [DashboardGraphicController::class, 'getFlujoProyectosTotalesDesa'])->middleware(['auth:sanctum']);
+Route::get('flujo-projects-fvc-por-vencer', [DashboardGraphicController::class, 'getFlujoProyectosPorVencerFvc'])->middleware(['auth:sanctum']);
+Route::get('flujo-projects-desa-por-vencer', [DashboardGraphicController::class, 'getFlujoProyectosPorVencerDesa'])->middleware(['auth:sanctum']);
 
 Route::get('user-assignment/my-slaves', [\App\Http\Controllers\UserAssignmentController::class,'getMySlaves'])->middleware(['auth:sanctum']);
 Route::apiResource('user-assignment', \App\Http\Controllers\UserAssignmentController::class)->middleware(['auth:sanctum']);

@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\ProjectData;
+use App\Models\ProjectType;
 use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardGraphicController extends Controller
 {
@@ -42,19 +44,21 @@ class DashboardGraphicController extends Controller
 
     public function getTotalesProyectos()
     {
-        $fvc = ProjectData::where('step_name','implementacion')->where('substep_name','actividades')->get();
-        $desa = ProjectData::where('step_name','ejecucion')->where('substep_name','actividades')->get();
+        $fvc = auth()->user()->projects()->whereHas('projectData',function($query){
+            $query->where('step_name','implementacion')->where('substep_name','actividades');
+        })->get();
+        $desa =  auth()->user()->projects()->whereHas('projectData',function($query){
+            $query->where('step_name','ejecucion')->where('substep_name','actividades');
+        })->get();
 
         $fvcRetraso = 0;
         $fvcPorVencer = 0;
-        $fvcTotal = 0;
+        $fvcTotal = auth()->user()->projects()->whereProjectTypeId(ProjectType::FVC)->get()->count();
 
         foreach ($fvc as $key => $value) {
             $table =@$value->content['table'];
             if($table) {
                 foreach ($table as $key1 => $value1) {
-                    $fvcTotal++;
-
                     $hoy = new DateTime(date('Y-m-d'));
                     $fechaFin = new DateTime($value1['dateEnd']);
 
@@ -72,14 +76,12 @@ class DashboardGraphicController extends Controller
 
         $desaRetraso = 0;
         $desaPorVencer = 0;
-        $desaTotal = 0;
+        $desaTotal =  auth()->user()->projects()->whereProjectTypeId(ProjectType::DESA)->get()->count();
 
         foreach ($desa as $key => $value) {
             $table = @$value->content['table'];
             if($table) {
                 foreach ($table as $key1 => $value1) {
-                    $desaTotal++;
-
                     $hoy = new DateTime(date('Y-m-d'));
                     $fechaFin = new DateTime($value1['dateEnd']);
 
@@ -120,7 +122,9 @@ class DashboardGraphicController extends Controller
 
         $labels = [];
 
-        $fvc = ProjectData::where('step_name','implementacion')->where('substep_name','actividades')->get();
+        $fvc =  auth()->user()->projects()->whereHas('projectData',function($query){
+            $query->where('step_name','implementacion')->where('substep_name','actividades');
+        })->get();
 
         foreach ($fvc as $key => $value) {
             $table = @$value->content['table'];
@@ -161,7 +165,9 @@ class DashboardGraphicController extends Controller
 
         $labels = [];
 
-        $desa = ProjectData::where('step_name','ejecucion')->where('substep_name','actividades')->get();
+        $desa = auth()->user()->projects()->whereHas('projectData',function($query){
+            $query->where('step_name','ejecucion')->where('substep_name','actividades');
+        })->get();
 
         foreach ($desa as $key => $value) {
             $table = @$value->content['table'];
@@ -210,7 +216,9 @@ class DashboardGraphicController extends Controller
 
         $labels = [];
 
-        $fvc = ProjectData::where('step_name','implementacion')->where('substep_name','actividades')->get();
+        $fvc = auth()->user()->projects()->whereHas('projectData',function($query){
+            $query->where('step_name','implementacion')->where('substep_name','actividades');
+        })->get();
 
         foreach ($fvc as $key => $value) {
             $table = @$value->content['table'];
