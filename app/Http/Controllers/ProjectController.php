@@ -60,7 +60,7 @@ class ProjectController extends Controller
         $data          = $request->validated();
         $project       = new Project($data);
         $project->uuid = $uuid;
-        $project->name = 'bdp' . '-' . today()->format('d-m-y') . '-' . $uuid;
+        $project->name = $request->name;
 
         if ($newProject = $user->projects()->save($project)) {
             $project_data = new ProjectData($data);
