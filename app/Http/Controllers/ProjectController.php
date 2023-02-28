@@ -30,9 +30,9 @@ class ProjectController extends Controller
     {
         $projects = auth()->user()->projects()->with('user')->get();
 
-        $details= ["open"=>auth()->user()->projects()->whereEstado(1)->get()->count(),"close"=>auth()->user()->projects()->whereEstado(0)->get()->count()];
+        $details = ["open" => auth()->user()->projects()->whereEstado(1)->get()->count(), "close" => auth()->user()->projects()->whereEstado(0)->get()->count()];
 
-        return Response::json(compact('projects','details'));
+        return Response::json(compact('projects', 'details'));
     }
 
     /**
@@ -56,16 +56,16 @@ class ProjectController extends Controller
     {
         $uuid = Str::uuid()->toString();
         // Crea un registro en projects y crea un registro en project_data
-        $user          = auth()->user();
-        $data          = $request->validated();
-        $project       = new Project($data);
+        $user = auth()->user();
+        $data = $request->validated();
+        $project = new Project($data);
         $project->uuid = $uuid;
         $project->name = $request->name;
 
         if ($newProject = $user->projects()->save($project)) {
             $project_data = new ProjectData($data);
             $newProject->projectData()->save($project_data);
-            $project_data               = new ProjectData($data);
+            $project_data = new ProjectData($data);
             $project_data->substep_name = 'actividades';
             $newProject->projectData()->save($project_data);
             return OkResponse($newProject);
@@ -105,42 +105,39 @@ class ProjectController extends Controller
      * Update the specified resource in storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @param int                      $id
+     * @param int $id
      *
      * @return \Illuminate\Http\Response
      */
-    public function update(ProjectRequest $request, $project)
+    public function update(ProjectRequest $request,string $project)
     {
         try {
             $project = Project::whereUuid($project)->first();
-            $data    = $request->validated();
-
-
+            $data = $request->validated();
+            $dataToUpdate = (object)$data['content'];
+//            if ($request->substep_name == "registro") {
+//                $projectData2 = $project->projectData()->whereStepName($request->step_name)->whereSubstepName('actividades')->first();
+//                $project->description = $dataToUpdate->description;
+//                $project->name = $dataToUpdate->project_name;
+//                if ($projectData2) {// Actualizar actividades segun registro
+//                    $newContent = ['content' => [
+//                        "description" => $dataToUpdate->description,
+//                        "origin" => $dataToUpdate->origin,
+//                        "project_type" => $dataToUpdate->project_type,
+//                        "project_sector" => $dataToUpdate->project_sector,
+//                        "project_name" => $dataToUpdate->project_name,
+//                        "economic_activity" => $dataToUpdate->economic_activity,
+//                    ]];
+//                    $project->projectData()->whereSubstepName('actividades')->update($newContent);
+//                }
+//                $project->update();
+//            }
             $updateProjectData = $this->editContentProject($request->step_name, $request->substep_name, $project->projectData, $data);
-
-            if ($request->substep_name == "registro") {
-                $projectData2 = $project->projectData()->whereStepName($request->step_name)->whereSubstepName('actividades')->first();
-                $dataToUpdate = (object)$data['content'];
-                $project->description=$dataToUpdate->description;
-                $project->name=$dataToUpdate->project_name;
-                if ($projectData2) {// Actualizar actividades segun registro
-                    $newContent   = ['content' => [
-                        "description" => $dataToUpdate->description,
-                        "origin" => $dataToUpdate->origin,
-                        "project_type" => $dataToUpdate->project_type,
-                        "project_sector" => $dataToUpdate->project_sector,
-                        "project_name"=>$dataToUpdate->project_name,
-                        "economic_activity" => $dataToUpdate->economic_activity,
-                    ]];
-                    $project->projectData()->whereSubstepName('actividades')->update((array)$newContent);
-                }
-                $project->update();
-            }
             if (!$updateProjectData) {
                 $project_data = new ProjectData($data);
                 $project->projectData()->save($project_data);
             }
-            return OkResponse($project);
+            return OkResponse($updateProjectData);
 
         } catch (\Throwable $th) {
 
@@ -149,16 +146,15 @@ class ProjectController extends Controller
         }
     }
 
-    public function editContentProject($step_name, $substep_name, $projectData, $request)
+    public function editContentProject($step_name, $substep_name, $projectData, $request):bool|object
     {
         foreach ($projectData as $data) {
             if ($data['step_name'] == $step_name && $data['substep_name'] == $substep_name) {
                 $updateProjectData = ProjectData::findOrFail($data['id']);
                 $updateProjectData->update($request);
-                return true;
+                return $updateProjectData;
             }
         }
-
         return false;
     }
 
@@ -190,7 +186,7 @@ class ProjectController extends Controller
 
         foreach ($projectData->projectData as $data) {
             if ($data['step_name'] == 'implementacion' && $data['substep_name'] == 'actividades') {
-                $updateProjectData          = ProjectData::findOrFail($data['id']);
+                $updateProjectData = ProjectData::findOrFail($data['id']);
                 $updateProjectData->content = $request->all();
                 $updateProjectData->update();
                 return $updateProjectData;
@@ -200,7 +196,7 @@ class ProjectController extends Controller
 
     public function closeProject($uuid)
     {
-        $project         = Project::whereUuid($uuid)->first();
+        $project = Project::whereUuid($uuid)->first();
         $project->estado = 0;
         $project->update();
         return OkResponse($project, 'Closed successfully', 204);
@@ -210,8 +206,8 @@ class ProjectController extends Controller
     public function getProjectStatus(string $uuid)
     {
 
-        $project                    = Project::whereUuid($uuid)->first();
-        $project_data               = $project->projectData()->select('id', 'step_name', 'substep_name')->orderBy('id', 'desc')->first();
+        $project = Project::whereUuid($uuid)->first();
+        $project_data = $project->projectData()->select('id', 'step_name', 'substep_name')->orderBy('id', 'desc')->first();
         $project_data->project_type = $project->projectType()->first()->slug;
         $project_data->project_type_name = $project->projectType()->first()->name;
         return OkResponse($project_data, 'get project status');
