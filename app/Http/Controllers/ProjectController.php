@@ -115,23 +115,23 @@ class ProjectController extends Controller
             $project = Project::whereUuid($project)->first();
             $data = $request->validated();
             $dataToUpdate = (object)$data['content'];
-//            if ($request->substep_name == "registro") {
-//                $projectData2 = $project->projectData()->whereStepName($request->step_name)->whereSubstepName('actividades')->first();
-//                $project->description = $dataToUpdate->description;
-//                $project->name = $dataToUpdate->project_name;
-//                if ($projectData2) {// Actualizar actividades segun registro
-//                    $newContent = ['content' => [
-//                        "description" => $dataToUpdate->description,
-//                        "origin" => $dataToUpdate->origin,
-//                        "project_type" => $dataToUpdate->project_type,
-//                        "project_sector" => $dataToUpdate->project_sector,
-//                        "project_name" => $dataToUpdate->project_name,
-//                        "economic_activity" => $dataToUpdate->economic_activity,
-//                    ]];
-//                    $project->projectData()->whereSubstepName('actividades')->update($newContent);
-//                }
-//                $project->update();
-//            }
+            if ($request->substep_name == "registro") {
+                $projectData2 = $project->projectData()->whereStepName($request->step_name)->whereSubstepName('actividades')->first();
+                $project->description = $dataToUpdate->description;
+                $project->name = $dataToUpdate->project_name;
+                if ($projectData2) {// Actualizar actividades segun registro
+                    $newContent = ['content' => [
+                        "description" => $dataToUpdate->description,
+                        "origin" => $dataToUpdate->origin,
+                        "project_type" => $dataToUpdate->project_type,
+                        "project_sector" => $dataToUpdate->project_sector,
+                        "project_name" => $dataToUpdate->project_name,
+                        "economic_activity" => $dataToUpdate->economic_activity,
+                    ]];
+                    $project->projectData()->whereSubstepName('actividades')->update($newContent);
+                }
+                $project->update();
+            }
             $updateProjectData = $this->editContentProject($request->step_name, $request->substep_name, $project->projectData, $data);
             if (!$updateProjectData) {
                 $project_data = new ProjectData($data);
