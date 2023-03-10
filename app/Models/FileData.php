@@ -10,7 +10,7 @@ class FileData extends Model
     use HasFactory;
     protected $fillable=['uuid','project_id','name_field','step','sub_step','route','size'];
 
-    function project(){
+    private function project(){
         return $this->hasMany(Project::class);
     }
 }

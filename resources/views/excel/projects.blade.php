@@ -1,4 +1,4 @@
-<table>
+<table aria-label="projects-table">
     <thead style="background-color: blue">
         <tr>
             <th>CÓDIGO</th>

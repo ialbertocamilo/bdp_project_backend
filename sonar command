@@ -1,0 +1,5 @@
+sonar-scanner \
+  -Dsonar.projectKey=BDP-Backend \
+  -Dsonar.sources=. \
+  -Dsonar.host.url=http://localhost:9000 \
+  -Dsonar.login=sqp_f660c6cb4610845d5976f2de3c2595e8a415601a
