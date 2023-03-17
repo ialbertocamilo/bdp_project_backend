@@ -38,30 +38,43 @@ class DashboardGraphicController extends Controller
                 'y' => 0,
                 'drilldown' => $this->meses[date('m', strtotime("-$i month"))],
                 'month' => date('m', strtotime("-$i month")),
+                'activity'=>"",
+
             ];//date('m', strtotime("-$i month"));
         }
     }
 
     public function getTotalesProyectos()
     {
-        $fvc = auth()->user()->projects()->whereHas('projectData',function($query){
-            $query->where('step_name','implementacion')->where('substep_name','actividades');
-        })->get();
-        $desa =  auth()->user()->projects()->whereHas('projectData',function($query){
-            $query->where('step_name','ejecucion')->where('substep_name','actividades');
-        })->get();
+
+        $fvc=ProjectData::whereHas('project.user', function ($query) {
+            $query->where('id', auth()->id());
+        })
+            ->where('step_name', 'implementacion')
+            ->where('substep_name', 'actividades')
+            ->select('id','step_name','substep_name','content')
+            ->get();
+        $desa =ProjectData::whereHas('project.user', function ($query) {
+            $query->where('id', auth()->id());
+        })
+            ->where('step_name', 'ejecucion')
+            ->where('substep_name', 'actividades')
+            ->select('id','step_name','substep_name','content')
+            ->get();
+
 
         $fvcRetraso = 0;
         $fvcPorVencer = 0;
-        $fvcTotal = auth()->user()->projects()->whereProjectTypeId(ProjectType::FVC)->get()->count();
+//        $fvcTotal = auth()->user()->projects()->whereProjectTypeId(ProjectType::FVC)->get()->count();
+        $fvcTotal = 0;
 
         foreach ($fvc as $key => $value) {
             $table =@$value->content['table'];
             if($table) {
                 foreach ($table as $key1 => $value1) {
+                    $fvcTotal++;
                     $hoy = new DateTime(date('Y-m-d'));
                     $fechaFin = new DateTime($value1['dateEnd']);
-
                     $diff = $hoy->diff($fechaFin);
 
                     if ($diff->invert) {
@@ -76,15 +89,16 @@ class DashboardGraphicController extends Controller
 
         $desaRetraso = 0;
         $desaPorVencer = 0;
-        $desaTotal =  auth()->user()->projects()->whereProjectTypeId(ProjectType::DESA)->get()->count();
+//        $desaTotal =  auth()->user()->projects()->whereProjectTypeId(ProjectType::DESA)->get()->count();
+        $desaTotal =  0;
 
         foreach ($desa as $key => $value) {
             $table = @$value->content['table'];
             if($table) {
                 foreach ($table as $key1 => $value1) {
+                    $desaTotal++;
                     $hoy = new DateTime(date('Y-m-d'));
                     $fechaFin = new DateTime($value1['dateEnd']);
-
                     $diff = $hoy->diff($fechaFin);
 
                     if ($diff->invert) {
@@ -122,41 +136,30 @@ class DashboardGraphicController extends Controller
 
         $labels = [];
 
-        $fvc =  auth()->user()->projects()->whereHas('projectData',function($query){
-            $query->where('step_name','implementacion')->where('substep_name','actividades');
-        })->get();
+        $fvc=ProjectData::whereHas('project.user', function ($query) {
+            $query->where('id', auth()->id());
+        })
+            ->where('step_name', 'implementacion')
+            ->where('substep_name', 'actividades')
+            ->select('id','step_name','substep_name','content')
+    ->get();
 
         foreach ($fvc as $key => $value) {
-            $table = @$value->content['table'];
-            if($table) {
-                foreach ($table as $key1 => $value1) {
-                    $fechaFin = $value1['dateEnd'];
-                    $color = "#1D4ED8";
-                    $data = $this->contarPorMeses($this->mesesPos,$fechaFin,$color);
-                    if ($data) {
-                        $labels[] = $data;
+                $table = @$value->content['table'];
+                if ($table) {
+                    foreach ($table as $key1 => $value1) {
+                        $fechaFin = $value1['dateEnd'];
+                        $color = "#1D4ED8";
+                        $activity=$value1['activity'];
+                        $data = $this->contarPorMeses($this->mesesPos, $fechaFin, $color,$activity);
+                        if ($data) {
+                            $labels[] = $data;
+                        }
                     }
                 }
-            }
         }
 
         return $labels;
-
-    }
-
-    private function contarPorMeses($meses, $fechaFin,$color)
-    {
-        $fechaComoEntero = strtotime($fechaFin);
-        $mes = date("m", $fechaComoEntero);
-        foreach ($meses as $key => $value) {
-            if ($value['month'] == $mes) {
-                $value['y'] = $value['y'] + 1;
-                $meses[$key]['y'] = $value['y'];
-                $meses[$key]['color'] = $color;
-                unset($meses[$key]['month']);
-                return $meses[$key];
-            }
-        }
 
     }
 
@@ -165,9 +168,13 @@ class DashboardGraphicController extends Controller
 
         $labels = [];
 
-        $desa = auth()->user()->projects()->whereHas('projectData',function($query){
-            $query->where('step_name','ejecucion')->where('substep_name','actividades');
-        })->get();
+        $desa = ProjectData::whereHas('project.user', function ($query) {
+            $query->where('id', auth()->id());
+        })
+            ->where('step_name', 'ejecucion')
+            ->where('substep_name', 'actividades')
+            ->select('id','step_name','substep_name','content')
+            ->get();
 
         foreach ($desa as $key => $value) {
             $table = @$value->content['table'];
@@ -175,7 +182,8 @@ class DashboardGraphicController extends Controller
                 foreach ($table as $key1 => $value1) {
                     $fechaFin = $value1['dateEnd'];
                     $color = "#1D4ED8";
-                    $data = $this->contarPorMeses($this->mesesPos,$fechaFin,$color);
+                    $activity=$value1['activity'];
+                    $data = $this->contarPorMeses($this->mesesPos, $fechaFin, $color,$activity);
                     if ($data) {
                         $labels[] = $data;
                     }
@@ -192,7 +200,15 @@ class DashboardGraphicController extends Controller
 
         $labels = [];
 
-        $desa = ProjectData::where('step_name','ejecucion')->where('substep_name','actividades')->get();
+        $desa =   ProjectData::whereHas('project.user', function ($query) {
+            $query->where('id', auth()->id());
+        })
+            ->where('step_name', 'ejecucion')
+            ->where('substep_name', 'actividades')
+            ->select('id','step_name','substep_name','content')
+            ->get();
+//        $desa=ProjectData::where('step_name','ejecucion')->where('substep_name','actividades')->get();
+
 
         foreach ($desa as $key => $value) {
             $table = @$value->content['table'];
@@ -200,7 +216,8 @@ class DashboardGraphicController extends Controller
                 foreach ($table as $key1 => $value1) {
                     $fechaFin = $value1['dateEnd'];
                     $color = "#B91C1C";
-                    $data = $this->contarPorMesesPorVencer($this->mesesPos,$fechaFin,$color);
+                    $activity=$value1['activity'];
+                    $data = $this->contarPorMesesPorVencer($this->mesesPos, $fechaFin, $color,$activity);
                     if ($data) {
                         $labels[] = $data;
                     }
@@ -216,9 +233,13 @@ class DashboardGraphicController extends Controller
 
         $labels = [];
 
-        $fvc = auth()->user()->projects()->whereHas('projectData',function($query){
-            $query->where('step_name','implementacion')->where('substep_name','actividades');
-        })->get();
+        $fvc =  ProjectData::whereHas('project.user', function ($query) {
+            $query->where('id', auth()->id());
+        })
+            ->where('step_name', 'implementacion')
+            ->where('substep_name', 'actividades')
+            ->select('id','step_name','substep_name','content')
+            ->get();
 
         foreach ($fvc as $key => $value) {
             $table = @$value->content['table'];
@@ -226,7 +247,8 @@ class DashboardGraphicController extends Controller
                 foreach ($table as $key1 => $value1) {
                     $fechaFin = $value1['dateEnd'];
                     $color = "#B91C1C";
-                    $data = $this->contarPorMesesPorVencer($this->mesesPos,$fechaFin,$color);
+                    $activity=$value1['activity'];
+                    $data = $this->contarPorMesesPorVencer($this->mesesPos,$fechaFin,$color,$activity);
                     if ($data) {
                         $labels[] = $data;
                     }
@@ -238,7 +260,24 @@ class DashboardGraphicController extends Controller
 
     }
 
-    private function contarPorMesesPorVencer($meses, $fechaFin,$color)
+
+    private function contarPorMeses($meses, $fechaFin,$color,$activity="")
+    {
+        $fechaComoEntero = strtotime($fechaFin);
+        $mes = date("m", $fechaComoEntero);
+        foreach ($meses as $key => $value) {
+            if ($value['month'] == $mes) {
+                $value['y'] = $value['y'] + 1;
+                $meses[$key]['y'] = $value['y'];
+                $meses[$key]['color'] = $color;
+                $meses[$key]['activity'] = $activity;
+                unset($meses[$key]['month']);
+                return $meses[$key];
+            }
+        }
+
+    }
+    private function contarPorMesesPorVencer($meses, $fechaFin,$color,$activity='')
     {
         $fechaComoEntero = strtotime($fechaFin);
         $mes = date("m", $fechaComoEntero);
@@ -253,6 +292,7 @@ class DashboardGraphicController extends Controller
                 }
 
                 $meses[$key]['color'] = $color;
+                $meses[$key]['activity'] = $activity;
                 unset($meses[$key]['month']);
                 return $meses[$key];
             }
