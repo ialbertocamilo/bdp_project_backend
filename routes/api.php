@@ -147,17 +147,17 @@ Route::delete('acquisition/{id}', [\App\Http\Controllers\AcquisitionController::
 
 Route::get('risk', [\App\Http\Controllers\RiskController::class, 'index'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
 Route::post('risk', [\App\Http\Controllers\RiskController::class, 'store'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
-Route::get('risk', [\App\Http\Controllers\RiskController::class, 'edit'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
-Route::get('risk', [\App\Http\Controllers\RiskController::class, 'show'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
-Route::put('risk', [\App\Http\Controllers\RiskController::class, 'update'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
-Route::delete('risk', [\App\Http\Controllers\RiskController::class, 'destroy'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
+Route::get('risk/{id}', [\App\Http\Controllers\RiskController::class, 'edit'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
+Route::get('risk/{id}', [\App\Http\Controllers\RiskController::class, 'show'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
+Route::put('risk/{id}', [\App\Http\Controllers\RiskController::class, 'update'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
+Route::delete('risk/{id}', [\App\Http\Controllers\RiskController::class, 'destroy'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
 
 Route::get('responsability', [\App\Http\Controllers\ResponsabilityController::class, 'index'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
 Route::post('responsability', [\App\Http\Controllers\ResponsabilityController::class, 'store'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
-Route::get('responsability', [\App\Http\Controllers\ResponsabilityController::class, 'edit'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
-Route::get('responsability', [\App\Http\Controllers\ResponsabilityController::class, 'show'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
-Route::put('responsability', [\App\Http\Controllers\ResponsabilityController::class, 'update'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
-Route::delete('responsability', [\App\Http\Controllers\ResponsabilityController::class, 'destroy'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
+Route::get('responsability/{id}', [\App\Http\Controllers\ResponsabilityController::class, 'edit'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
+Route::get('responsability/{id}', [\App\Http\Controllers\ResponsabilityController::class, 'show'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
+Route::put('responsability/{id}', [\App\Http\Controllers\ResponsabilityController::class, 'update'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
+Route::delete('responsability/{id}', [\App\Http\Controllers\ResponsabilityController::class, 'destroy'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
 
 Route::get('/export-projects', function () {
     return Excel::download(new ProjectsExport, 'users.xlsx');
