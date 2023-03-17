@@ -142,7 +142,7 @@ Route::get('acquisition', [\App\Http\Controllers\AcquisitionController::class, '
 Route::post('acquisition', [\App\Http\Controllers\AcquisitionController::class, 'store'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
 Route::get('acquisition/{id}', [\App\Http\Controllers\AcquisitionController::class, 'edit'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
 Route::get('acquisition/{id}', [\App\Http\Controllers\AcquisitionController::class, 'show'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
-Route::put('acquisition/{id}', [\App\Http\Controllers\AcquisitionController::class, 'put'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
+Route::put('acquisition/{id}', [\App\Http\Controllers\AcquisitionController::class, 'update'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
 Route::delete('acquisition/{id}', [\App\Http\Controllers\AcquisitionController::class, 'destroy'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
 
 Route::get('risk', [\App\Http\Controllers\RiskController::class, 'index'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor|Auditor']);
