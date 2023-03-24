@@ -31,7 +31,7 @@ class DashboardGraphicController extends Controller
             '12' => 'Diciembre'
         ];
 
-        for ($i=0; $i < 4; $i++)
+        for ($i=3; $i >= 0 ; $i--)
         {
             $this->mesesPos[] = [
                 'name' => $this->meses[date('m', strtotime("-$i month"))],
@@ -142,7 +142,7 @@ class DashboardGraphicController extends Controller
             ->select('id','step_name','substep_name','content')
         ->get();
 
-        for ($i=0; $i < 4; $i++)
+        for ($i=3; $i >= 0 ; $i--)
         {
             $mesesPos[] = [
                 'name' => $this->meses[date('m', strtotime("-$i month"))],
@@ -181,7 +181,7 @@ class DashboardGraphicController extends Controller
 
         $mesesPos = [];
 
-        for ($i=0; $i < 4; $i++)
+        for ($i=3; $i >= 0 ; $i--)
         {
             $mesesPos[] = [
                 'name' => $this->meses[date('m', strtotime("-$i month"))],
@@ -220,7 +220,7 @@ class DashboardGraphicController extends Controller
 
         $mesesPos = [];
 
-        for ($i=0; $i < 4; $i++)
+        for ($i=3; $i >= 0 ; $i--)
         {
             $mesesPos[] = [
                 'name' => $this->meses[date('m', strtotime("-$i month"))],
@@ -258,7 +258,7 @@ class DashboardGraphicController extends Controller
 
         $mesesPos = [];
 
-        for ($i=0; $i < 4; $i++)
+        for ($i=3; $i >= 0 ; $i--)
         {
             $mesesPos[] = [
                 'name' => $this->meses[date('m', strtotime("-$i month"))],
