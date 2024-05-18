@@ -1,0 +1,59 @@
+version: '3'
+
+services:
+  #  server:
+  #    image: nginx:alpine
+  #    container_name: server
+  #    restart: unless-stopped
+  #    ports:
+  #      - 81:80
+  #      - 444:443
+  #    networks:
+  #      - app-network
+  ##    volumes:
+  ##      - ./:/var/www/html
+  #      - ./.docker/nginx:/etc/nginx/conf.d/
+  #    depends_on:
+  #      - app
+  db:
+    image: mariadb:10.2
+    container_name: database
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: "${DB_DATABASE}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+    restart: on-failure
+    volumes:
+      - db:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+
+  app:
+    image: php:8.2-fpm
+    build: .
+    restart: unless-stopped
+    container_name: bdp-api
+    command: sh -c "chmod -R 777 /app/storage && php artisan key:generate && php artisan migrate:fresh --seed && php artisan serve --host=0.0.0.0 --port=9000"
+    ports:
+      - "9000:9000"
+      - "8000:9000"
+    depends_on:
+      - db
+    env_file:
+      - .env
+    networks:
+      - app-network
+#    volumes:
+#      - .:/app
+
+volumes:
+  db:
+    driver: local
+networks:
+  app-network:
+    driver: bridge

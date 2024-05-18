@@ -1,0 +1,19 @@
+
+//login request
+
+POST http://localhost:9000/api/login
+Content-Type: application/x-www-form-urlencoded
+
+email = admin@admin.com &
+password = 123
+
+###
+
+//sanctum csrf
+
+GET http://localhost:9000/sanctum/csrf-cookie
+Content-Type: application/x-www-form-urlencoded
+
+
+###
+
