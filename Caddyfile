@@ -1,0 +1,34 @@
+{
+    frankenphp
+    order php_server before file_server
+}
+
+:80 {
+    root * /var/www/html/public
+    
+    # Enable PHP processing
+    php_server
+    
+    # Handle Laravel routes
+    try_files {path} {path}/ /index.php?{query}
+    
+    # Security headers
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+    
+    # Gzip compression
+    encode gzip
+    
+    # File server for static assets
+    file_server
+    
+    # Logs
+    log {
+        output stdout
+        format console
+    }
+}
