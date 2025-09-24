@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProjectRequest;
+use App\Http\Traits\CacheableTrait;
 use App\Models\Project;
 use App\Models\ProjectData;
 use ArrayObject;
@@ -15,6 +16,7 @@ use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
+    use CacheableTrait;
     /**
      * Display a listing of the resource.
      *
@@ -22,7 +24,9 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        $projects = Project::all();
+        $projects = $this->remember('all_projects', 300, function () {
+            return Project::with(['projectData'])->get();
+        });
         return Response::json(compact('projects'));
     }
 

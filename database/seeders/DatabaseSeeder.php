@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -16,17 +17,34 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
+        // Crear roles primero
+        $this->call(RoleSeeder::class);
+        
+        // Crear usuario administrador principal
+        $adminUser = User::firstOrCreate(
+            ['email' => 'admin@admin.com'],
+            [
+                'name' => 'Administrador',
+                'email' => 'admin@admin.com',
+                'password' => Hash::make('123'),
+                'status' => 'active',
+                'is_active' => true,
+                'email_verified_at' => now()
+            ]
+        );
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);;
-        $user=new User();
-        $user->name="admin";
-        $user->email="admin@admin.com";
-        $user->password=Hash::make('123');
-        $user->save();
+        // Asignar rol de administrador
+        $adminRole = Role::where('slug', 'admin')->first();
+        if ($adminRole && !$adminUser->hasRole('admin')) {
+            $adminUser->assignRole('admin');
+        }
+
+        $this->command->info('Usuario administrador creado: admin@admin.com / 123');
+        
+        // Crear tipos de proyecto
         $this->call(ProjectTypeSeeder::class);
+        
+        // Crear usuarios de prueba (opcional)
+        $this->call(TestUsersSeeder::class);
     }
 }
