@@ -22,12 +22,12 @@ class CheckRoleMiddleware
             ? $role
             : explode('|', $role);
 
-        $userRole = Auth::user()->roles;
+        $user = Auth::user();
 
-        foreach ($userRole as $value) {
-            if(in_array($value['name'], $roles)){
-                return $next($request);
-            }
+        // Use Spatie's built-in hasAnyRole() method which handles caching
+        // This avoids the N+1 query on every request
+        if ($user->hasAnyRole($roles)) {
+            return $next($request);
         }
 
         return response()->json(['error' => 'No tiene el rol correcto.'],403);

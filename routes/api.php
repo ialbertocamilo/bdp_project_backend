@@ -24,6 +24,40 @@ use Maatwebsite\Excel\Facades\Excel;
 
 Route::get("/test",fn()=>'test');
 
+Route::post('/login-test', function (Request $request) {
+    $start = microtime(true);
+
+    // Test 1: Just attempt auth
+    $auth = Auth::attempt(['email' => $request->email, 'password' => $request->password]);
+    $time_auth = microtime(true) - $start;
+
+    // Test 2: Full response
+    if ($auth) {
+        $profile = Auth::user()->load('roles');
+        $time_load = microtime(true) - $start - $time_auth;
+
+        $token = (object)$profile->createToken('bdp_token');
+        $token = $token->plainTextToken;
+        $time_token = microtime(true) - $start - $time_auth - $time_load;
+
+        return response()->json([
+            'status' => 'success',
+            'times' => [
+                'auth_attempt_ms' => $time_auth * 1000,
+                'load_roles_ms' => $time_load * 1000,
+                'create_token_ms' => $time_token * 1000,
+                'total_ms' => (microtime(true) - $start) * 1000
+            ]
+        ], 202);
+    }
+
+    $time_failed = microtime(true) - $start;
+    return response()->json([
+        'status' => 'failed',
+        'time_auth_attempt_ms' => $time_failed * 1000
+    ], 401);
+});
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -31,13 +65,16 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/login', function (Request $request) {
     $auth = Auth::attempt(['email' => $request->email, 'password' => $request->password]);
     if ($auth) {
-        $token   = (object)$request->user()->createToken('bdp_token');
+        // Load user with roles eagerly to avoid N+1 queries
+        $profile = Auth::user()->load('roles');
+        $token   = (object)$profile->createToken('bdp_token');
         $token   = $token->plainTextToken;
         $message = "Successfully.";
         $roles   = '';
-        $profile=Auth::user();
-        if (count(Auth::user()->roles) > 0) {
-            $roles = Auth::user()->roles[0]->name;
+
+        // Single check using already-loaded roles
+        if ($profile->roles->count() > 0) {
+            $roles = $profile->roles[0]->name;
         }
         return response()->json(compact('token', 'roles','profile', 'message'), 202);
     }
