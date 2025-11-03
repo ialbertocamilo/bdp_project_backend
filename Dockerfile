@@ -22,19 +22,7 @@ RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache && \
     chmod -R 775 /app/storage /app/bootstrap/cache
 
 # PHP Performance Optimization Configuration
-# CRITICAL: Enable opcache for 5-10x speedup (this is the main optimization!)
-RUN echo "[opcache]\n\
-opcache.enable=1\n\
-opcache.enable_cli=1\n\
-opcache.memory_consumption=256\n\
-opcache.interned_strings_buffer=16\n\
-opcache.max_accelerated_files=20000\n\
-opcache.max_wasted_percentage=10\n\
-opcache.consistency_checks=0\n\
-opcache.validate_timestamps=1\n\
-opcache.revalidate_freq=0\n\
-\n\
-[PHP]\n\
+RUN echo "[PHP]\n\
 memory_limit=512M\n\
 max_execution_time=300\n\
 upload_max_filesize=100M\n\
