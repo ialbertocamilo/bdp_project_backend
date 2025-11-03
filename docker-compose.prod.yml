@@ -1,59 +1,65 @@
-version: '3'
+version: '3.8'
 
 services:
-  #  server:
-  #    image: nginx:alpine
-  #    container_name: server
-  #    restart: unless-stopped
-  #    ports:
-  #      - 81:80
-  #      - 444:443
-  #    networks:
-  #      - app-network
-  ##    volumes:
-  ##      - ./:/var/www/html
-  #      - ./.docker/nginx:/etc/nginx/conf.d/
-  #    depends_on:
-  #      - app
-  db:
-    image: mariadb:10.2
-    container_name: database
-    env_file:
-      - .env
+  frankenphp:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: bdp-app-prod
+    restart: always
+    ports:
+      - '${APP_PORT:-80}:80'
+      - '${APP_PORT_HTTPS:-443}:443'
     environment:
-      MYSQL_DATABASE: "${DB_DATABASE}"
-      MYSQL_USER: "${DB_USERNAME}"
-      MYSQL_PASSWORD: "${DB_PASSWORD}"
-      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
-    restart: on-failure
-    volumes:
-      - db:/var/lib/mysql
-    ports:
-      - "3306:3306"
+      SERVER_NAME: ':80'
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: '${DB_DATABASE}'
+      DB_USERNAME: '${DB_USERNAME}'
+      DB_PASSWORD: '${DB_PASSWORD}'
+      APP_DEBUG: 'false'
+      APP_ENV: production
+    working_dir: /app
     networks:
-      - app-network
-
-  app:
-    image: php:8.2-fpm
-    build: .
-    restart: unless-stopped
-    container_name: bdp-api
-    command: sh -c "chmod -R 777 /app/storage && php artisan key:generate && php artisan migrate:fresh --seed && php artisan serve --host=0.0.0.0 --port=9000"
-    ports:
-      - "9000:9000"
-      - "8000:9000"
+      - bdp
     depends_on:
-      - db
-    env_file:
-      - .env
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  mysql:
+    image: 'mysql/mysql-server:8.0'
+    container_name: bdp-mysql-prod
+    restart: always
+    ports:
+      - '${FORWARD_DB_PORT:-3306}:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 0
+    volumes:
+      - 'mysql-prod-data:/var/lib/mysql'
     networks:
-      - app-network
-#    volumes:
-#      - .:/app
+      - bdp
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+      retries: 3
+      timeout: 5s
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  bdp:
+    driver: bridge
 
 volumes:
-  db:
+  mysql-prod-data:
     driver: local
-networks:
-  app-network:
-    driver: bridge

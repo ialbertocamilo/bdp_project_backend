@@ -1,38 +1,48 @@
-FROM php:8.2-fpm as builder
+FROM dunglas/frankenphp:latest-php8.2
 
 WORKDIR /app
 
-COPY composer*.json .
+# Instalar extensiones PHP necesarias (usando el helper de FrankenPHP)
+RUN install-php-extensions gd zip pdo_mysql
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libzip-dev \
-    libpng-dev \
-    libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    libonig-dev \
-    locales \
-    zip \
-    jpegoptim optipng pngquant gifsicle \
-    vim \
-    git \
-    curl \
-    libssl-dev
+# Instalar Composer desde la imagen oficial
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Instalamos extensiones de PHP
-RUN docker-php-ext-install pdo_mysql zip exif pcntl
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-RUN docker-php-ext-install gd
+# Copiar solo los archivos de dependencias primero (para caché de Docker)
+COPY composer.json composer.lock* ./
 
-# Instalamos composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Instalar dependencias (incluyendo dev para desarrollo)
+RUN composer install --no-interaction --prefer-dist --ignore-platform-reqs || true
 
-# Instalamos dependendencias de composer
-RUN composer install --no-ansi --no-dev --no-interaction --no-progress --optimize-autoloader --no-scripts
-
+# Copiar el resto del código
 COPY . .
 
-EXPOSE 9000
+# Establecer permisos correctos
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache && \
+    chmod -R 775 /app/storage /app/bootstrap/cache
 
+# PHP Performance Optimization Configuration
+# CRITICAL: Enable opcache for 5-10x speedup (this is the main optimization!)
+RUN echo "[opcache]\n\
+opcache.enable=1\n\
+opcache.enable_cli=1\n\
+opcache.memory_consumption=256\n\
+opcache.interned_strings_buffer=16\n\
+opcache.max_accelerated_files=20000\n\
+opcache.max_wasted_percentage=10\n\
+opcache.consistency_checks=0\n\
+opcache.validate_timestamps=1\n\
+opcache.revalidate_freq=0\n\
+\n\
+[PHP]\n\
+memory_limit=512M\n\
+max_execution_time=300\n\
+upload_max_filesize=100M\n\
+post_max_size=100M\n\
+realpath_cache_size=4096K\n\
+realpath_cache_ttl=600\n\
+" > /usr/local/etc/php/conf.d/performance.ini
 
+EXPOSE 80 443
 
+CMD ["frankenphp", "php-server", "--root", "/app/public"]

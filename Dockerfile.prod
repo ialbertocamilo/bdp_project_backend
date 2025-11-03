@@ -1,0 +1,57 @@
+FROM dunglas/frankenphp:latest-php8.3 as builder
+
+WORKDIR /app
+
+# Instalar extensiones PHP necesarias
+RUN install-php-extensions gd zip pdo_mysql
+
+# Instalar Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Copiar archivos de dependencias
+COPY composer.json composer.lock* ./
+
+# Instalar dependencias sin dev
+RUN composer install --no-dev --no-interaction --prefer-dist --ignore-platform-reqs --optimize-autoloader --no-scripts
+
+# Copiar código de la aplicación
+COPY . .
+
+# Ejecutar scripts post-autoload
+RUN composer run-script post-autoload-dump
+
+# Eliminar archivos innecesarios para reducir tamaño
+RUN rm -rf .git .github .gitignore tests node_modules
+
+# ===== Etapa final =====
+FROM dunglas/frankenphp:latest-php8.3
+
+WORKDIR /app
+
+# Instalar extensiones PHP necesarias
+RUN install-php-extensions gd zip pdo_mysql
+
+# Copiar solo los archivos necesarios del builder
+COPY --from=builder /app /app
+COPY --from=builder /usr/local/bin/composer /usr/local/bin/composer
+
+# Establecer permisos correctos
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache && \
+    chmod -R 775 /app/storage /app/bootstrap/cache && \
+    chmod -R 644 /app/bootstrap/cache
+
+EXPOSE 80 443
+
+# Script de inicio para producción: solo migrate y luego inicia servidor
+RUN echo '#!/bin/sh\n\
+echo "Ejecutando migraciones..."\n\
+php artisan migrate --force\n\
+echo "Limpiando caché..."\n\
+php artisan config:cache\n\
+php artisan route:cache\n\
+php artisan view:cache\n\
+echo "Iniciando FrankenPHP..."\n\
+frankenphp php-server --root /app/public' > /app/start.sh && \
+chmod +x /app/start.sh
+
+CMD ["/app/start.sh"]
