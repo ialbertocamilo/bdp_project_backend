@@ -24,6 +24,10 @@ use Maatwebsite\Excel\Facades\Excel;
 
 Route::get("/test",fn()=>'test');
 
+// Test routes without middleware to identify bottleneck
+Route::get("/test-no-middleware",fn()=>'test')->withoutMiddleware(['api']);
+Route::get("/test-web",fn()=>'test')->middleware('web');
+
 Route::post('/login-test', function (Request $request) {
     $start = microtime(true);
 
