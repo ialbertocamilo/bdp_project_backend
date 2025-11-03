@@ -66,16 +66,26 @@ Route::post('/login', function (Request $request) {
     $auth = Auth::attempt(['email' => $request->email, 'password' => $request->password]);
     if ($auth) {
         // Load user with roles eagerly to avoid N+1 queries
-        $profile = Auth::user()->load('roles');
-        $token   = (object)$profile->createToken('bdp_token');
+        $user = Auth::user();
+        $user->load('roles');
+
+        $token   = (object)$user->createToken('bdp_token');
         $token   = $token->plainTextToken;
         $message = "Successfully.";
         $roles   = '';
 
         // Single check using already-loaded roles
-        if ($profile->roles->count() > 0) {
-            $roles = $profile->roles[0]->name;
+        if ($user->roles->count() > 0) {
+            $roles = $user->roles[0]->name;
         }
+
+        // Only return essential user data, not the entire model
+        $profile = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+        ];
+
         return response()->json(compact('token', 'roles','profile', 'message'), 202);
     }
     return response()->json(['error' => 'credentials error'], 401);
