@@ -19,11 +19,22 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => [
+        'http://localhost:3000',
+        'http://localhost:8080',
+        'https://svgdev.tech',
+        'http://localhost:5173'
+    ],
 
-    'allowed_origins_patterns' => ['*'],
+    'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['*'],
+    'allowed_headers' => [
+        'Accept',
+        'Authorization',
+        'Content-Type',
+        'X-Signature',
+        'X-XSRF-TOKEN',
+    ],
 
     'exposed_headers' => ['*'],
 

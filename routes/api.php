@@ -3,6 +3,7 @@
 use App\Exports\ProjectsExport;
 use App\Http\Controllers\DashboardGraphicController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ImportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Resources\UserResource;
@@ -23,44 +24,6 @@ use Maatwebsite\Excel\Facades\Excel;
 */
 
 Route::get("/test",fn()=>'test');
-
-// Test routes without middleware to identify bottleneck
-Route::get("/test-no-middleware",fn()=>'test')->withoutMiddleware(['api']);
-Route::get("/test-web",fn()=>'test')->middleware('web');
-
-Route::post('/login-test', function (Request $request) {
-    $start = microtime(true);
-
-    // Test 1: Just attempt auth
-    $auth = Auth::attempt(['email' => $request->email, 'password' => $request->password]);
-    $time_auth = microtime(true) - $start;
-
-    // Test 2: Full response
-    if ($auth) {
-        $profile = Auth::user()->load('roles');
-        $time_load = microtime(true) - $start - $time_auth;
-
-        $token = (object)$profile->createToken('bdp_token');
-        $token = $token->plainTextToken;
-        $time_token = microtime(true) - $start - $time_auth - $time_load;
-
-        return response()->json([
-            'status' => 'success',
-            'times' => [
-                'auth_attempt_ms' => $time_auth * 1000,
-                'load_roles_ms' => $time_load * 1000,
-                'create_token_ms' => $time_token * 1000,
-                'total_ms' => (microtime(true) - $start) * 1000
-            ]
-        ], 202);
-    }
-
-    $time_failed = microtime(true) - $start;
-    return response()->json([
-        'status' => 'failed',
-        'time_auth_attempt_ms' => $time_failed * 1000
-    ], 401);
-});
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -103,43 +66,6 @@ Route::get('/logout', function (Request $request) {
 
     return response()->json(["msg" => Auth::check()]);
 })->middleware("auth:sanctum");
-
-const DOMAIN = "bdp.com.bo";
-const DN     = "dc=bdp,dc=com,dc=bo";
-//Route::get('/test', function () {
-//    $user    = "rchiri";
-//    $pass    = "consultor.1";
-//    $ldaprdn = 'mydomain' . "\\" . $username;
-//
-//    ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
-//    ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
-//
-//    $bind = @ldap_bind($ldap, $ldaprdn, $password);
-//
-//    if ($bind) {
-//        $filter = "(sAMAccountName=$username)";
-//        $result = ldap_search($ldap, "dc=MYDOMAIN,dc=COM", $filter);
-//        ldap_sort($ldap, $result, "sn");
-//        $info = ldap_get_entries($ldap, $result);
-//        for ($i = 0; $i < $info["count"]; $i++) {
-//            if ($info['count'] > 1)
-//                break;
-//            echo "<p>You are accessing <strong> " . $info[$i]["sn"][0] . ", " . $info[$i]["givenname"][0] . "</strong><br /> (" . $info[$i]["samaccountname"][0] . ")</p>\n";
-//            echo '<pre>';
-//            var_dump($info);
-//            echo '</pre>';
-//            $userDn = $info[$i]["distinguishedname"][0];
-//        }
-//        @ldap_close($ldap);
-//    } else {
-//        $msg = "Invalid email address / password";
-//        echo $msg;
-//    }
-//    if ($array == 0 || $array == '')
-//        return response()->json(["data" => $array, "msg" => "Usuario AD incorrecto"]);
-//    return response()->json(["data" => $array, "msg" => "Logeado correctamente"]);
-//});
-
 
 Route::group(['prefix' => 'project', 'middleware' => 'auth:sanctum,role:Gestor|Supervisor|Auditor'], function () {
     Route::get('get-contents/{step}/{substep}/{uid}', [\App\Http\Controllers\ProjectController::class, 'getAllContents']);
@@ -231,6 +157,11 @@ Route::get('flujo-projects-desa-por-vencer', [DashboardGraphicController::class,
 
 Route::get('user-assignment/my-slaves', [\App\Http\Controllers\UserAssignmentController::class,'getMySlaves'])->middleware(['auth:sanctum']);
 Route::apiResource('user-assignment', \App\Http\Controllers\UserAssignmentController::class)->middleware(['auth:sanctum']);
+
+Route::post('import/projects', [ImportController::class, 'importProjects'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
+Route::get('import/template', [ImportController::class, 'getTemplate'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
+Route::post('import/validate', [ImportController::class, 'validateFile'])->middleware(['auth:sanctum', 'role:Gestor|Supervisor']);
+Route::get('import/history', [ImportController::class, 'history'])->middleware(['auth:sanctum']);
 
 /* Route::get('api',function(){
 

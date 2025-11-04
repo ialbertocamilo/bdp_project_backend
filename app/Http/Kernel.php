@@ -4,6 +4,9 @@ namespace App\Http;
 
 use App\Http\Middleware\AdAuth;
 use App\Http\Middleware\CheckRoleMiddleware;
+use App\Http\Middleware\RateLimitMiddleware;
+use App\Http\Middleware\HmacMiddleware;
+use App\Http\Middleware\XSSProtectionMiddleware;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -23,6 +26,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        XSSProtectionMiddleware::class,
     ];
 
     /**
@@ -43,6 +47,7 @@ class Kernel extends HttpKernel
         'api' => [
              \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:120,1',
+            RateLimitMiddleware::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
@@ -65,7 +70,9 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'role' => CheckRoleMiddleware::class
-//        'auth.ad'=>AdAuth::class
+        'role' => CheckRoleMiddleware::class,
+        'hmac' => HmacMiddleware::class,
+        'rate.limit' => RateLimitMiddleware::class,
+        'xss.protection' => XSSProtectionMiddleware::class
     ];
 }
